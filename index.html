@@ -36,16 +36,27 @@
             color: #57606a;
             font-size: 12px;
         }
-        .graph {
-            display: grid;
-            grid-template-columns: auto repeat(53, 1fr);
-            gap: 3px;
+        .graph-container {
+            display: flex;
+        }
+        .weekdays {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding-right: 5px;
         }
         .weekday {
             font-size: 12px;
             color: #57606a;
             text-align: right;
-            padding-right: 5px;
+            height: 15px;
+            line-height: 15px;
+        }
+        .graph {
+            display: grid;
+            grid-template-columns: repeat(53, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 3px;
         }
         .day {
             width: 10px;
@@ -55,8 +66,6 @@
         }
         .usage-1 { background-color: #9be9a8; }
         .usage-2 { background-color: #40c463; }
-        .usage-3 { background-color: #30a14e; }
-        .usage-4 { background-color: #216e39; }
         .footer {
             display: flex;
             justify-content: space-between;
@@ -82,11 +91,19 @@
         <button class="year-selector">2024 ▼</button>
     </div>
     <div class="container">
-        <div class="months">
-            <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
-            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span>
+        <div class="months" id="months"></div>
+        <div class="graph-container">
+            <div class="weekdays">
+                <div class="weekday">Mon</div>
+                <div class="weekday"></div>
+                <div class="weekday">Wed</div>
+                <div class="weekday"></div>
+                <div class="weekday">Fri</div>
+                <div class="weekday"></div>
+                <div class="weekday"></div>
+            </div>
+            <div class="graph" id="contributionGraph"></div>
         </div>
-        <div class="graph" id="contributionGraph"></div>
         <div class="footer">
             <span>Learn how we count contributions</span>
             <div class="legend">
@@ -94,8 +111,8 @@
                 <div class="legend-item" style="background-color: #ebedf0;"></div>
                 <div class="legend-item usage-1"></div>
                 <div class="legend-item usage-2"></div>
-                <div class="legend-item usage-3"></div>
-                <div class="legend-item usage-4"></div>
+                <div class="legend-item usage-2"></div>
+                <div class="legend-item usage-2"></div>
                 <span>More</span>
             </div>
         </div>
@@ -103,42 +120,32 @@
 
     <script>
         const contributionGraph = document.getElementById('contributionGraph');
-        const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const monthsContainer = document.getElementById('months');
+        const months = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
         const weeksInYear = 53;
+        const daysInWeek = 7;
 
-        function getRandomUsage() {
-            return Math.floor(Math.random() * 5);
-        }
-
-        function getUsageClass(level) {
-            if (level === 0) return '';
-            return `usage-${level}`;
-        }
-
-        // 添加星期几标签
-        weekdays.forEach(day => {
-            const weekday = document.createElement('div');
-            weekday.className = 'weekday';
-            weekday.textContent = day;
-            contributionGraph.appendChild(weekday);
+        // 添加月份
+        months.forEach(month => {
+            const monthElement = document.createElement('span');
+            monthElement.textContent = month;
+            monthsContainer.appendChild(monthElement);
         });
 
         // 添加所有天的贡献方块
         for (let week = 0; week < weeksInYear; week++) {
-            for (let day = 0; day < 7; day++) {
+            for (let day = 0; day < daysInWeek; day++) {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'day';
-                const usage = getRandomUsage();
-                dayElement.classList.add(getUsageClass(usage));
                 contributionGraph.appendChild(dayElement);
             }
         }
 
         // 添加7月份的两个特定贡献
-        const firstMonday = contributionGraph.children[8]; // 第一个星期一的方块
-        const nextDay = contributionGraph.children[9]; // 第一个星期二的方块
+        const firstMonday = contributionGraph.children[0]; // 第一个星期一的方块
+        const nextMonday = contributionGraph.children[7]; // 下一个星期一的方块
         firstMonday.className = 'day usage-2';
-        nextDay.className = 'day usage-1';
+        nextMonday.className = 'day usage-1';
     </script>
 </body>
 </html>
