@@ -38,7 +38,7 @@
         }
         .graph {
             display: grid;
-            grid-template-columns: repeat(53, 1fr);
+            grid-template-columns: auto repeat(53, 1fr);
             gap: 3px;
         }
         .weekday {
@@ -103,8 +103,7 @@
 
     <script>
         const contributionGraph = document.getElementById('contributionGraph');
-        const weekdays = ['Mon', 'Wed', 'Fri'];
-        const daysInWeek = 7;
+        const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const weeksInYear = 53;
 
         function getRandomUsage() {
@@ -116,21 +115,30 @@
             return `usage-${level}`;
         }
 
-        for (let i = 0; i < daysInWeek; i++) {
-            if (i % 2 === 0) {
-                const weekday = document.createElement('div');
-                weekday.className = 'weekday';
-                weekday.textContent = weekdays[i / 2];
-                contributionGraph.appendChild(weekday);
-            }
-            for (let j = 0; j < weeksInYear; j++) {
-                const day = document.createElement('div');
-                day.className = 'day';
+        // 添加星期几标签
+        weekdays.forEach(day => {
+            const weekday = document.createElement('div');
+            weekday.className = 'weekday';
+            weekday.textContent = day;
+            contributionGraph.appendChild(weekday);
+        });
+
+        // 添加所有天的贡献方块
+        for (let week = 0; week < weeksInYear; week++) {
+            for (let day = 0; day < 7; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day';
                 const usage = getRandomUsage();
-                day.classList.add(getUsageClass(usage));
-                contributionGraph.appendChild(day);
+                dayElement.classList.add(getUsageClass(usage));
+                contributionGraph.appendChild(dayElement);
             }
         }
+
+        // 添加7月份的两个特定贡献
+        const firstMonday = contributionGraph.children[8]; // 第一个星期一的方块
+        const nextDay = contributionGraph.children[9]; // 第一个星期二的方块
+        firstMonday.className = 'day usage-2';
+        nextDay.className = 'day usage-1';
     </script>
 </body>
 </html>
