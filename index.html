@@ -61,14 +61,43 @@
             display: none;
             white-space: nowrap;
         }
+        .legend {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 16px;
+            font-size: 12px;
+            color: #57606a;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-left: 8px;
+        }
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 4px;
+        }
     </style>
 </head>
 <body>
-    <h1>Computer Usage Heatmap</h1>
+    <h2>73 contributions in the last year</h2>
     <div class="container">
         <div class="months" id="months"></div>
         <div class="graph" id="graph"></div>
+        <div class="legend">
+            <span>Less</span>
+            <div class="legend-item"><div class="legend-color" style="background-color: #ebedf0;"></div></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #9be9a8;"></div></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #40c463;"></div></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #30a14e;"></div></div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #216e39;"></div></div>
+            <span>More</span>
+        </div>
     </div>
+    <div id="stats"></div>
 
     <script>
         const graph = document.getElementById('graph');
@@ -76,17 +105,18 @@
         const weekdays = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        // 获取当前日期
         const today = new Date();
         const oneYearAgo = new Date(today);
         oneYearAgo.setFullYear(today.getFullYear() - 1);
-        oneYearAgo.setDate(oneYearAgo.getDate() - oneYearAgo.getDay());
 
-        // 生成月份标签
+        let totalDays = 0;
+        let totalHours = 0;
+
+        // Generate month labels
         let currentDate = new Date(oneYearAgo);
         let lastMonth = -1;
         for (let week = 0; week < 53; week++) {
-            if (currentDate.getMonth() !== lastMonth) {
+            if (currentDate <= today && currentDate.getMonth() !== lastMonth) {
                 const monthLabel = document.createElement('div');
                 monthLabel.textContent = months[currentDate.getMonth()];
                 monthLabel.className = 'month-label';
@@ -97,7 +127,7 @@
             currentDate.setDate(currentDate.getDate() + 7);
         }
 
-        // 生成星期标签和单元格
+        // Generate weekday labels and cells
         weekdays.forEach(day => {
             const dayLabel = document.createElement('div');
             dayLabel.textContent = day;
@@ -106,31 +136,28 @@
 
             currentDate = new Date(oneYearAgo);
             for (let i = 0; i < 53; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.dataset.date = currentDate.toISOString().split('T')[0];
-                graph.appendChild(cell);
+                if (currentDate <= today) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.date = currentDate.toISOString().split('T')[0];
+
+                    const usage = Math.floor(Math.random() * 5);
+                    const hours = Math.floor(Math.random() * 8);
+                    const minutes = Math.floor(Math.random() * 60);
+                    cell.dataset.usage = `${hours}h ${minutes}m`;
+                    if (usage > 0) {
+                        cell.className = `cell usage-${usage}`;
+                        totalDays++;
+                        totalHours += hours + minutes / 60;
+                    }
+
+                    graph.appendChild(cell);
+                }
                 currentDate.setDate(currentDate.getDate() + 7);
             }
         });
 
-        // 模拟使用时间数据（这里您需要替换为实际的数据收集逻辑）
-        function simulateUsage() {
-            const cells = document.querySelectorAll('.cell');
-            cells.forEach(cell => {
-                const usage = Math.floor(Math.random() * 5);
-                const hours = Math.floor(Math.random() * 24);
-                const minutes = Math.floor(Math.random() * 60);
-                cell.dataset.usage = `${hours}h ${minutes}m`;
-                if (usage > 0) {
-                    cell.className = `cell usage-${usage}`;
-                }
-            });
-        }
-
-        simulateUsage();
-
-        // 添加鼠标悬停效果
+        // Add hover effect
         graph.addEventListener('mouseover', (event) => {
             if (event.target.classList.contains('cell')) {
                 const tooltip = document.createElement('div');
@@ -149,6 +176,10 @@
                 }
             }
         });
+
+        // Update stats
+        const statsElement = document.getElementById('stats');
+        statsElement.textContent = `Total usage: ${totalDays} days, ${Math.round(totalHours)} hours`;
     </script>
 </body>
 </html>
