@@ -19,7 +19,7 @@
         .graph {
             display: grid;
             grid-template-columns: auto repeat(53, 1fr);
-            gap: 3px;
+            gap: 2px;
         }
         .weekday {
             font-size: 12px;
@@ -60,6 +60,9 @@
             z-index: 1;
             display: none;
             white-space: nowrap;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
         }
         .legend {
             display: flex;
@@ -72,13 +75,13 @@
         .legend-item {
             display: flex;
             align-items: center;
-            margin-left: 8px;
+            margin-left: 4px;
         }
         .legend-color {
             width: 10px;
             height: 10px;
             border-radius: 2px;
-            margin-right: 4px;
+            margin-right: 0px;
         }
     </style>
 </head>
@@ -108,6 +111,7 @@
         const today = new Date();
         const oneYearAgo = new Date(today);
         oneYearAgo.setFullYear(today.getFullYear() - 1);
+        oneYearAgo.setDate(oneYearAgo.getDate() + 1); // Ensure it's exactly one year
 
         let totalDays = 0;
         let totalHours = 0;
@@ -153,7 +157,7 @@
 
                     graph.appendChild(cell);
                 }
-                currentDate.setDate(currentDate.getDate() + 7);
+                currentDate.setDate(currentDate.getDate() + 1);
             }
         });
 
