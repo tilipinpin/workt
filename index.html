@@ -3,187 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Computer Usage Heatmap</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            border: 1px solid #d0d7de;
-            border-radius: 6px;
-            padding: 16px;
-        }
-        .graph {
-            display: grid;
-            grid-template-columns: auto repeat(53, 1fr);
-            gap: 2px;
-        }
-        .weekday {
-            font-size: 12px;
-            color: #57606a;
-            text-align: right;
-            padding-right: 4px;
-        }
-        .cell {
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
-            background-color: #ebedf0;
-            position: relative;
-        }
-        .usage-1 { background-color: #9be9a8; }
-        .usage-2 { background-color: #40c463; }
-        .usage-3 { background-color: #30a14e; }
-        .usage-4 { background-color: #216e39; }
-        .months {
-            display: grid;
-            grid-template-columns: repeat(53, 1fr);
-            text-align: start;
-            font-size: 12px;
-            color: #57606a;
-            padding-left: 28px;
-            margin-bottom: 8px;
-        }
-        .month-label {
-            position: relative;
-        }
-        .tooltip {
-            position: absolute;
-            background-color: #24292e;
-            color: #fff;
-            padding: 5px;
-            border-radius: 3px;
-            font-size: 12px;
-            z-index: 1;
-            display: none;
-            white-space: nowrap;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .legend {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            margin-top: 16px;
-            font-size: 12px;
-            color: #57606a;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-left: 4px;
-        }
-        .legend-color {
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
-            margin-right: 0px;
-        }
-    </style>
+    <title>Contribution Calendar</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h2>73 contributions in the last year</h2>
-    <div class="container">
-        <div class="months" id="months"></div>
-        <div class="graph" id="graph"></div>
-        <div class="legend">
-            <span>Less</span>
-            <div class="legend-item"><div class="legend-color" style="background-color: #ebedf0;"></div></div>
-            <div class="legend-item"><div class="legend-color" style="background-color: #9be9a8;"></div></div>
-            <div class="legend-item"><div class="legend-color" style="background-color: #40c463;"></div></div>
-            <div class="legend-item"><div class="legend-color" style="background-color: #30a14e;"></div></div>
-            <div class="legend-item"><div class="legend-color" style="background-color: #216e39;"></div></div>
-            <span>More</span>
+    <div class="contribution-calendar">
+        <div class="header">
+            <span>73 contributions in the last year</span>
+            <div id="months" class="months"></div>
         </div>
+        <div class="calendar">
+            <div id="days-of-week" class="days"></div>
+            <div id="contribution-grid" class="grid"></div>
+        </div>
+        <div id="tooltip" class="tooltip"></div>
     </div>
-    <div id="stats"></div>
-
-    <script>
-        const graph = document.getElementById('graph');
-        const monthsContainer = document.getElementById('months');
-        const weekdays = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-        const today = new Date();
-        const oneYearAgo = new Date(today);
-        oneYearAgo.setFullYear(today.getFullYear() - 1);
-        oneYearAgo.setDate(oneYearAgo.getDate() + 1); // Ensure it's exactly one year
-
-        let totalDays = 0;
-        let totalHours = 0;
-
-        // Generate month labels
-        let currentDate = new Date(oneYearAgo);
-        let lastMonth = -1;
-        for (let week = 0; week < 53; week++) {
-            if (currentDate <= today && currentDate.getMonth() !== lastMonth) {
-                const monthLabel = document.createElement('div');
-                monthLabel.textContent = months[currentDate.getMonth()];
-                monthLabel.className = 'month-label';
-                monthLabel.style.gridColumnStart = week + 1;
-                monthsContainer.appendChild(monthLabel);
-                lastMonth = currentDate.getMonth();
-            }
-            currentDate.setDate(currentDate.getDate() + 7);
-        }
-
-        // Generate weekday labels and cells
-        weekdays.forEach(day => {
-            const dayLabel = document.createElement('div');
-            dayLabel.textContent = day;
-            dayLabel.className = 'weekday';
-            graph.appendChild(dayLabel);
-
-            currentDate = new Date(oneYearAgo);
-            for (let i = 0; i < 53; i++) {
-                if (currentDate <= today) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.dataset.date = currentDate.toISOString().split('T')[0];
-
-                    const usage = Math.floor(Math.random() * 5);
-                    const hours = Math.floor(Math.random() * 8);
-                    const minutes = Math.floor(Math.random() * 60);
-                    cell.dataset.usage = `${hours}h ${minutes}m`;
-                    if (usage > 0) {
-                        cell.className = `cell usage-${usage}`;
-                        totalDays++;
-                        totalHours += hours + minutes / 60;
-                    }
-
-                    graph.appendChild(cell);
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-        });
-
-        // Add hover effect
-        graph.addEventListener('mouseover', (event) => {
-            if (event.target.classList.contains('cell')) {
-                const tooltip = document.createElement('div');
-                tooltip.className = 'tooltip';
-                tooltip.textContent = `${event.target.dataset.date}: ${event.target.dataset.usage}`;
-                event.target.appendChild(tooltip);
-                tooltip.style.display = 'block';
-            }
-        });
-
-        graph.addEventListener('mouseout', (event) => {
-            if (event.target.classList.contains('cell')) {
-                const tooltip = event.target.querySelector('.tooltip');
-                if (tooltip) {
-                    tooltip.remove();
-                }
-            }
-        });
-
-        // Update stats
-        const statsElement = document.getElementById('stats');
-        statsElement.textContent = `Total usage: ${totalDays} days, ${Math.round(totalHours)} hours`;
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

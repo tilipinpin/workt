@@ -1,0 +1,87 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f6f8fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.contribution-calendar {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 800px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.months {
+    display: grid;
+    grid-template-columns: repeat(53, 12px); /* 52 weeks + 1 extra column for offset */
+    gap: 4px;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+}
+
+.calendar {
+    display: flex;
+}
+
+.days {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-right: 10px;
+    font-size: 12px;
+    color: #666;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(52, 12px);
+    grid-template-rows: repeat(7, 12px);
+    gap: 4px;
+}
+
+.day {
+    width: 12px;
+    height: 12px;
+    background-color: #ebedf0;
+    border-radius: 3px;
+    position: relative;
+}
+
+.day[data-level="1"] {
+    background-color: #c6e48b;
+}
+
+.day[data-level="2"] {
+    background-color: #7bc96f;
+}
+
+.day[data-level="3"] {
+    background-color: #239a3b;
+}
+
+.day[data-level="4"] {
+    background-color: #196127;
+}
+
+.tooltip {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    display: none;
+}
