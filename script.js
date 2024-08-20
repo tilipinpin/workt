@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const today = new Date();
     let currentDate = new Date(today);
-    currentDate.setDate(currentDate.getDate() - (365 + today.getDay())); // Calculate 1 year ago, starting from the closest Sunday
+    currentDate.setDate(currentDate.getDate()); // Start from today
 
     const monthsContainer = document.getElementById('months');
     const daysOfWeekContainer = document.getElementById('days-of-week');
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Generate the contribution grid
     for (let week = 0; week < 52; week++) {
-        for (let day = 0; day < 7; day++) {
+        for (let day = 6; day >= 0; day--) { // Start from the last day (Saturday) back to Sunday
             const dayElement = document.createElement('div');
             dayElement.classList.add('day');
 
@@ -44,12 +44,12 @@ document.addEventListener('DOMContentLoaded', function () {
             gridContainer.appendChild(dayElement);
 
             // Store the month of the current day
-            if (currentDate.getDate() === 1 || (week === 0 && day === 0)) {
-                months.push({ month: monthNames[currentDate.getMonth()], week });
+            if (currentDate.getDate() === 1 || (week === 0 && day === 6)) {
+                months.push({ month: monthNames[currentDate.getMonth()], week: 51 - week });
             }
 
-            // Move to the next day
-            currentDate.setDate(currentDate.getDate() + 1);
+            // Move to the previous day
+            currentDate.setDate(currentDate.getDate() - 1);
         }
     }
 
