@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contribution Calendar</title>
+    <title>GitHub Contribution Graph</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="contribution-calendar">
-        <div class="header">
-            <span>73 contributions in the last year</span>
-            <div id="months" class="months"></div>
+    <div class="calendar">
+        <div class="months"></div>
+        <div class="content">
+            <div class="weekdays">
+                <div>Mon</div>
+                <div>Wed</div>
+                <div>Fri</div>
+            </div>
+            <div class="weeks"></div>
         </div>
-        <div class="calendar">
-            <div id="days-of-week" class="days"></div>
-            <div id="contribution-grid" class="grid"></div>
-        </div>
-        <div id="tooltip" class="tooltip"></div>
     </div>
+    <div class="tooltip" id="tooltip"></div>
     <script src="script.js"></script>
 </body>
 </html>
