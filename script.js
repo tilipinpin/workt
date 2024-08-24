@@ -11,9 +11,9 @@ document.addEventListener("DOMContentLoaded", function() {
     currentDate.setDate(today.getDate() - today.getDay());
 
     const months = [];
-    let lastMonth = currentDate.getMonth();
+    let lastMonth = -1;
 
-    // 创建日期方格，从52周前的周日开始生成，确保从周日开始
+    // 创建日期方格，从52周前的周日开始生成
     for (let i = 0; i < 52; i++) {
         const weekDiv = document.createElement("div");
         weekDiv.classList.add("week");
@@ -25,22 +25,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
             const specificDate = new Date(currentDate);
 
+            // 检查是否需要添加月份标签
+            if (specificDate.getDate() <= 7 && specificDate.getDay() === 0) {
+                const monthName = specificDate.toLocaleString('en-US', { month: 'short' });
+                if (!months.includes(monthName)) {
+                    months.push(monthName);
+                }
+            }
+
             // 只显示今天及以前的日期
             if (specificDate <= today) {
                 const day = specificDate.getDate();
                 const month = specificDate.getMonth();
-
-                // 只在每个月的第一天显示月份标签
-                if (day === 1 || (i === 0 && j === 0)) {
-                    if (lastMonth !== month) {
-                        months.push(specificDate.toLocaleString('default', { month: 'short' }));
-                        lastMonth = month;
-                    } else {
-                        months.push("");
-                    }
-                } else {
-                    months.push("");
-                }
 
                 // 模拟随机使用数据，并设置颜色等级
                 const randomUsage = Math.floor(Math.random() * 13);
@@ -80,7 +76,15 @@ document.addEventListener("DOMContentLoaded", function() {
         currentDate.setDate(currentDate.getDate() - 14);  // 回到上周日
     }
 
-    // 生成月份标签，确保只在每个月的第一天显示
+    // 确保显示所有12个月份
+    const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    allMonths.forEach(month => {
+        if (!months.includes(month)) {
+            months.push(month);
+        }
+    });
+
+    // 生成月份标签
     months.reverse();
     months.forEach(month => {
         const monthDiv = document.createElement("div");
