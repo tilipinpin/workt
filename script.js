@@ -4,11 +4,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const weeksContainer = document.querySelector(".weeks");
     const tooltip = document.getElementById("tooltip");
 
-    const today = new Date(2024, 7, 22); // 假设今天是2024年8月22日
-    let currentDate = new Date(today);
+    const today = new Date(); // 获取当前日期
+    const thisSunday = new Date(today);
+    thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
 
-    // 调整currentDate到今天所在周的周日
-    currentDate.setDate(today.getDate() - today.getDay());
+    let currentDate = new Date(thisSunday);
 
     const months = [];
     let lastMonth = -1;
