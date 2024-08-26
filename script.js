@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 const specificDate = new Date(currentDate);
 
-                // 检��是否需要添加月份标签
+                // 检是否需要添加月份标签
                 if (specificDate.getDate() <= 7 && specificDate.getDay() === 0) {
                     const monthName = specificDate.toLocaleString('en-US', { month: 'short' });
                     if (!months.includes(monthName)) {
@@ -98,4 +98,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 每24小时更新一次日历
     setInterval(generateCalendar, 24 * 60 * 60 * 1000);
+
+    function updateMonthLabels() {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthsContainer = document.querySelector('.months');
+        monthsContainer.innerHTML = ''; // 清空现有标签
+
+        const today = new Date();
+        const startMonth = new Date(today.getFullYear(), today.getMonth() - 11, 1);
+
+        for (let i = 0; i < 12; i++) {
+            const monthDiv = document.createElement('div');
+            const currentMonth = new Date(startMonth.getFullYear(), startMonth.getMonth() + i, 1);
+            monthDiv.textContent = months[currentMonth.getMonth()];
+            monthsContainer.appendChild(monthDiv);
+        }
+    }
+
+    // 初始更新
+    updateMonthLabels();
+
+    // 每天午夜更新一次
+    setInterval(updateMonthLabels, 24 * 60 * 60 * 1000);
 });
