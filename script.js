@@ -44,8 +44,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     let level = 0;
                     if (randomUsage > 0) level = 1;
                     if (randomUsage > 4) level = 2;
-                    if (randomUsage > 8) level = 3;
-                    if (randomUsage > 10) level = 4;
+                    if (randomUsage > 8.75) level = 3;
+                    if (randomUsage > 10.75) level = 4;
 
                     dayDiv.setAttribute("data-level", level);
                     dayDiv.setAttribute("data-date", specificDate.toISOString().split('T')[0]);
