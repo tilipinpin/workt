@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 const specificDate = new Date(currentDate);
 
-                // 检是否需要添加月份标签
+                // 检是��需要添加月份标签
                 if (specificDate.getDate() <= 7 && specificDate.getDay() === 0) {
                     const monthName = specificDate.toLocaleString('en-US', { month: 'short' });
                     if (!months.includes(monthName)) {
@@ -50,6 +50,12 @@ document.addEventListener("DOMContentLoaded", function() {
                     dayDiv.setAttribute("data-level", level);
                     dayDiv.setAttribute("data-date", specificDate.toISOString().split('T')[0]);
                     dayDiv.setAttribute("data-usage", randomUsage);
+
+                    // 统计使用天数和小时数
+                    if (randomUsage > 0) {
+                        totalDays++;
+                        totalHours += randomUsage;
+                    }
 
                     // 工具提示功能
                     dayDiv.addEventListener("mouseenter", function() {
@@ -92,6 +98,21 @@ document.addEventListener("DOMContentLoaded", function() {
             monthDiv.innerText = month;
             monthsContainer.appendChild(monthDiv);
         });
+
+        // 更新统计结果
+        updateStats(totalDays, totalHours);
+    }
+
+    let totalDays = 0;
+    let totalHours = 0;
+
+    function updateStats(days, hours) {
+        const statsContainer = document.createElement('div');
+        statsContainer.classList.add('stats-container');
+        statsContainer.innerHTML = `
+           <span>过去一年：${days}天，${hours.toFixed(1)}小时</span>
+        `;
+        calendar.appendChild(statsContainer);
     }
 
     generateCalendar();
