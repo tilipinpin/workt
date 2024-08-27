@@ -114,7 +114,7 @@ body {
 
 .legend-squares {
     display: flex;
-    margin: 0 5px;
+    margin: 0 0px;
 }
 
 .legend-square {
@@ -132,8 +132,8 @@ body {
 
 .stats-container {
     font-size: 12px; /* 调整为与月份标签相同的大小 */
-    color: #767676; /* 使用与月份标签相似的颜色 */
-    margin-top: 0 1px; /* 在日历方格和统计信息之间添加一些间距 */
+    color: #050505; /* 使用与月份标签相似的颜色 */
+    margin-top: -15px; /* 在日历方格和统计信息之间添加一些间距 */
     text-align: left; /* 左对齐文本 */
-    padding-left: 10px; /* 添加一些左侧填充，使其与日历方格对齐 */
+    padding-left: 30px; /* 添加一些左侧填充，使其与日历方格对齐 */
 }

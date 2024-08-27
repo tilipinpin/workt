@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const statsContainer = document.createElement('div');
         statsContainer.classList.add('stats-container');
         statsContainer.innerHTML = `
-           <span>过去一年：${days}天，${hours.toFixed(1)}小时</span>
+           <span>最近一年工作——${days}天——${hours.toFixed(1)}小时</span>
         `;
         calendar.appendChild(statsContainer);
     }
