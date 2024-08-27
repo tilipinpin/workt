@@ -72,15 +72,15 @@ body {
 }
 
 .day[data-level="2"] {
-    background-color: #7bc96f;
+    background-color: #74c967;
 }
 
 .day[data-level="3"] {
-    background-color: #239a3b;
+    background-color: #309f46;
 }
 
 .day[data-level="4"] {
-    background-color: #196127;
+    background-color: #1b662a;
 }
 
 .day.future {
@@ -102,3 +102,30 @@ body {
 .tooltip.show {
     opacity: 1;
 }
+
+.legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #767676;
+}
+
+.legend-squares {
+    display: flex;
+    margin: 0 5px;
+}
+
+.legend-square {
+    width: 10px;
+    height: 10px;
+    margin: 0 1px;
+    border-radius: 1.5px;
+}
+
+.legend-square[data-level="0"] { background-color: #ebedf0; }
+.legend-square[data-level="1"] { background-color: #c6e48b; }
+.legend-square[data-level="2"] { background-color: #74c967; }
+.legend-square[data-level="3"] { background-color: #309f46; }
+.legend-square[data-level="4"] { background-color: #1b662a; }
