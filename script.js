@@ -4,8 +4,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const weeksContainer = document.querySelector(".weeks");
     const tooltip = document.getElementById("tooltip");
 
+    let usageData = {}; // 添加这行来存储使用数据
+    let calendarGenerated = false; // 添加此标志
+
     // 从 GitHub 获取使用数据
-    fetch('https://raw.githubusercontent.com/tilipinpin/workt/main/data/usage_data.csv')
+    fetch('https://raw.githubusercontent.com/tilipinpin/workt/main/date/usage_data.csv')
         .then(response => response.text())
         .then(data => {
             // 解析 CSV 数据
@@ -14,11 +17,20 @@ document.addEventListener("DOMContentLoaded", function() {
                 const [date, hours] = row.split(',');
                 usageData[date] = parseFloat(hours);
             });
-            generateCalendar();
+            if (!calendarGenerated) { // 只在第一次生成日历
+                generateCalendar();
+                calendarGenerated = true;
+            }
         })
         .catch(error => console.error('Error:', error));
 
     function generateCalendar() {
+        // 清空现有内容
+        weeksContainer.innerHTML = '';
+        monthsContainer.innerHTML = '';
+        totalDays = 0;
+        totalHours = 0;
+
         const today = new Date(); // 获取当前日期
         const thisSunday = new Date(today);
         thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
@@ -50,25 +62,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 // 只显示今天及以前的日期
                 if (specificDate <= today) {
-                    const day = specificDate.getDate();
-                    const month = specificDate.getMonth();
+                    const dateString = specificDate.toISOString().split('T')[0];
+                    const usage = usageData[dateString] || 0;
 
-                    // 模拟随机使用数据，并设置颜色等级
-                    const randomUsage = Math.floor(Math.random() * 13);
                     let level = 0;
-                    if (randomUsage > 0) level = 1;
-                    if (randomUsage > 4) level = 2;
-                    if (randomUsage > 8.75) level = 3;
-                    if (randomUsage > 10.75) level = 4;
+                    if (usage > 0) level = 1;
+                    if (usage > 4) level = 2;
+                    if (usage > 8.75) level = 3;
+                    if (usage > 10.75) level = 4;
 
                     dayDiv.setAttribute("data-level", level);
-                    dayDiv.setAttribute("data-date", specificDate.toISOString().split('T')[0]);
-                    dayDiv.setAttribute("data-usage", randomUsage);
+                    dayDiv.setAttribute("data-date", dateString);
+                    dayDiv.setAttribute("data-usage", usage);
 
                     // 统计使用天数和小时数
-                    if (randomUsage > 0) {
+                    if (usage > 0) {
                         totalDays++;
-                        totalHours += randomUsage;
+                        totalHours += usage;
                     }
 
                     // 工具提示功能
@@ -90,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
 
                 weekDiv.appendChild(dayDiv);
-                currentDate.setDate(currentDate.getDate() + 1); // 生成下一天
+                currentDate.setDate(currentDate.getDate() + 1); // 生下一天
             }
 
             weeksContainer.prepend(weekDiv); // 从右向左插入
@@ -129,10 +139,12 @@ document.addEventListener("DOMContentLoaded", function() {
         calendar.appendChild(statsContainer);
     }
 
-    generateCalendar();
-
     // 每24小时更新一次日历
-    setInterval(generateCalendar, 24 * 60 * 60 * 1000);
+    setInterval(function() {
+        if (Object.keys(usageData).length > 0) {
+            generateCalendar();
+        }
+    }, 24 * 60 * 60 * 1000);
 
     function updateMonthLabels() {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
