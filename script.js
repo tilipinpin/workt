@@ -1,9 +1,22 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
     const weeksContainer = document.querySelector(".weeks");
     const tooltip = document.getElementById("tooltip");
+
+    // 从 GitHub 获取使用数据
+    fetch('https://raw.githubusercontent.com/tilipinpin/workt/main/data/usage_data.csv')
+        .then(response => response.text())
+        .then(data => {
+            // 解析 CSV 数据
+            const rows = data.split('\n');
+            rows.forEach(row => {
+                const [date, hours] = row.split(',');
+                usageData[date] = parseFloat(hours);
+            });
+            generateCalendar();
+        })
+        .catch(error => console.error('Error:', error));
 
     function generateCalendar() {
         const today = new Date(); // 获取当前日期
@@ -27,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 const specificDate = new Date(currentDate);
 
-                // 检是��需要添加月份标签
+                // 检是需要添加月份标签
                 if (specificDate.getDate() <= 7 && specificDate.getDay() === 0) {
                     const monthName = specificDate.toLocaleString('en-US', { month: 'short' });
                     if (!months.includes(monthName)) {
