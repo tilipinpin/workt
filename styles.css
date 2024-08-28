@@ -142,3 +142,8 @@ body {
 .container {
     padding-top: 20px; /* 可以根据需要调整顶部间距 */
 }
+
+.no-data {
+    background-color: #f0f0f0;
+    opacity: 0.5;
+}

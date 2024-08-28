@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
