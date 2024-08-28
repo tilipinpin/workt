@@ -2,9 +2,10 @@ body {
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     height: 100vh;
     margin: 0;
+    padding: 0;
     background-color: #ffffff;
 }
 
@@ -136,4 +137,8 @@ body {
     margin-top: -15px; /* 在日历方格和统计信息之间添加一些间距 */
     text-align: left; /* 左对齐文本 */
     padding-left: 30px; /* 添加一些左侧填充，使其与日历方格对齐 */
+}
+
+.container {
+    padding-top: 20px; /* 可以根据需要调整顶部间距 */
 }
