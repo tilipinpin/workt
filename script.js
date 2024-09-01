@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const weekDiv = document.createElement("div");
             weekDiv.classList.add("week");
 
-            // 生成一周的日期方格，从周日到周六
+            // 生成一周的日期方格，从周日到周���
             for (let j = 0; j < 7; j++) {
                 const dayDiv = document.createElement("div");
                 dayDiv.classList.add("day");
@@ -107,21 +107,8 @@ document.addEventListener("DOMContentLoaded", function() {
             currentDate.setDate(currentDate.getDate() - 14);  // 回到上周日
         }
 
-        // 确保显示所有12个月份
-        const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        allMonths.forEach(month => {
-            if (!months.includes(month)) {
-                months.push(month);
-            }
-        });
-
-        // 生成月份标签
-        months.reverse();
-        months.forEach(month => {
-            const monthDiv = document.createElement("div");
-            monthDiv.innerText = month;
-            monthsContainer.appendChild(monthDiv);
-        });
+        // 替换为调用updateMonthLabels函数，传入第一个日期方格的日期
+        updateMonthLabels(currentDate);
 
         // 更新统计结果
         updateStats(totalDays, totalHours);
@@ -146,24 +133,33 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }, 24 * 60 * 60 * 1000);
 
-    function updateMonthLabels() {
+    function updateMonthLabels(startDate) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const monthsContainer = document.querySelector('.months');
         monthsContainer.innerHTML = ''; // 清空现有标签
 
-        const today = new Date();
-        const startMonth = new Date(today.getFullYear(), today.getMonth() - 11, 1);
+        let currentDate = new Date(startDate);
+        let lastMonth = -1;
+        let monthsAdded = new Set();
 
-        for (let i = 0; i < 12; i++) {
-            const monthDiv = document.createElement('div');
-            const currentMonth = new Date(startMonth.getFullYear(), startMonth.getMonth() + i, 1);
-            monthDiv.textContent = months[currentMonth.getMonth()];
-            monthsContainer.appendChild(monthDiv);
+        for (let i = 0; i < 53; i++) { // 53周以确保覆盖整个年份
+            const monthIndex = currentDate.getMonth();
+            if (monthIndex !== lastMonth && !monthsAdded.has(monthIndex)) {
+                const monthDiv = document.createElement('div');
+                monthDiv.textContent = months[monthIndex];
+                monthDiv.style.width = `${100 / 12}%`; // 设置宽度以平均分布
+                monthDiv.style.display = 'inline-block';
+                monthsContainer.appendChild(monthDiv);
+                lastMonth = monthIndex;
+                monthsAdded.add(monthIndex);
+            }
+            currentDate.setDate(currentDate.getDate() + 7); // 移动到下一周
+
+            // 如果已经添加了12个月份，就退出循环
+            if (monthsAdded.size === 12) {
+                break;
+            }
         }
     }
-
-    // 初始更新
-    updateMonthLabels();
 
     // 每天午夜更新一次
     setInterval(updateMonthLabels, 24 * 60 * 60 * 1000);
