@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const weekDiv = document.createElement("div");
             weekDiv.classList.add("week");
 
-            // 生成一周的日期方格，从周日到周���
+            // 生成一周的日期方格，从周日到周
             for (let j = 0; j < 7; j++) {
                 const dayDiv = document.createElement("div");
                 dayDiv.classList.add("day");
@@ -146,8 +146,8 @@ document.addEventListener("DOMContentLoaded", function() {
             if (monthIndex !== lastMonth && !monthsAdded.has(monthIndex)) {
                 const monthDiv = document.createElement('div');
                 monthDiv.textContent = months[monthIndex];
-                monthDiv.style.width = `${100 / 12}%`; // 设置宽度以平均分布
-                monthDiv.style.display = 'inline-block';
+                monthDiv.style.flex = '1'; // 使月份标签均匀分布
+                monthDiv.style.textAlign = 'center';
                 monthsContainer.appendChild(monthDiv);
                 lastMonth = monthIndex;
                 monthsAdded.add(monthIndex);

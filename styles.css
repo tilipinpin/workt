@@ -1,4 +1,3 @@
-
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -13,6 +12,8 @@ body {
 .calendar {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 1200px; /* 限制最大宽度 */
 }
 
 .months {
@@ -23,7 +24,7 @@ body {
 }
 
 .months div {
-    width: calc((100% - 20px) / 12); /* 12个月份，减去左侧padding */
+    flex: 1; /* 使月份标签均匀分布 */
     text-align: center;
     font-size: 12px; /* 与星期字体大小一致 */
     font-weight: normal; /* 确保字体不加粗 */
@@ -32,6 +33,7 @@ body {
 
 .content {
     display: flex;
+    flex-wrap: wrap; /* 使内容在小屏幕上换行 */
 }
 
 .weekdays {
@@ -53,6 +55,7 @@ body {
 .weeks {
     display: flex;
     flex-grow: 1;
+    flex-wrap: wrap; /* 使周在小屏幕上换行 */
 }
 
 .week {
@@ -147,4 +150,21 @@ body {
 .no-data {
     background-color: #f0f0f0;
     opacity: 0.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .months div {
+        font-size: 10px; /* 调整小屏幕上的字体大小 */
+    }
+
+    .day {
+        width: 8px;
+        height: 8px;
+    }
+
+    .legend-square {
+        width: 8px;
+        height: 8px;
+    }
 }
