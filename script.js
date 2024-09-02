@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function() {
             currentDate.setDate(currentDate.getDate() - 14);  // 回到上周日
         }
 
-        // 替换为调用updateMonthLabels函数，传入第一个日期方格的日期
+        // 替换���调用updateMonthLabels函数，传入第一个日期方格的日期
         updateMonthLabels(currentDate);
 
         // 更新统计结果
