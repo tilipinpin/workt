@@ -155,6 +155,10 @@ body {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+    .months {
+        margin-bottom: 10px; /* 增加月份标签和日期方格之间的距离 */
+    }
+
     .months div {
         font-size: 10px; /* 调整小屏幕上的字体大小 */
     }
