@@ -14,13 +14,14 @@ document.addEventListener("DOMContentLoaded", function() {
             // 解析 CSV 数据
             const rows = data.split('\n');
             rows.forEach(row => {
-                const [date, startTime, endTime, hours] = row.split(','); // 增加开机时间和关机时间
+                const [date, startTime, endTime, hours] = row.split(',');
                 usageData[date] = {
                     startTime: startTime, // 开机时间
                     endTime: endTime,     // 关机时间
                     hours: parseFloat(hours) // 使用时间
                 };
             });
+            console.log(usageData); // 调试信息，查看数据是否正确
             if (!calendarGenerated) { // 只在第一次生成日历
                 generateCalendar();
                 calendarGenerated = true;
