@@ -14,8 +14,12 @@ document.addEventListener("DOMContentLoaded", function() {
             // 解析 CSV 数据
             const rows = data.split('\n');
             rows.forEach(row => {
-                const [date, hours] = row.split(',');
-                usageData[date] = parseFloat(hours);
+                const [date, startTime, endTime, hours] = row.split(','); // 增加开机时间和关机时间
+                usageData[date] = {
+                    startTime: startTime, // 开机时间
+                    endTime: endTime,     // 关机时间
+                    hours: parseFloat(hours) // 使用时间
+                };
             });
             if (!calendarGenerated) { // 只在第一次生成日历
                 generateCalendar();
@@ -63,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 // 只显示今天及以前的日期
                 if (specificDate <= today) {
                     const dateString = specificDate.toISOString().split('T')[0];
-                    const usage = usageData[dateString] || 0;
+                    const usage = usageData[dateString].hours || 0;
 
                     let level = 0;
                     if (usage > 0) level = 1;
@@ -85,7 +89,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     dayDiv.addEventListener("mouseenter", function() {
                         const usage = this.getAttribute("data-usage");
                         const date = this.getAttribute("data-date");
-                        tooltip.innerText = `${date}: ${usage} hours`;
+                        const startTime = this.getAttribute("data-start-time"); // 获取开机时间
+                        const endTime = this.getAttribute("data-end-time"); // 获取关机时间
+
+                        // 更新工具提示内容
+                        tooltip.innerText = `${date}\n开机时间: ${startTime}\n关机时间: ${endTime}\n使用时间: ${usage} hours`;
                         tooltip.style.left = `${this.getBoundingClientRect().left + window.scrollX}px`;
                         tooltip.style.top = `${this.getBoundingClientRect().top + window.scrollY - 30}px`;
                         tooltip.classList.add("show");
@@ -107,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function() {
             currentDate.setDate(currentDate.getDate() - 14);  // 回到上周日
         }
 
-        // 替换���调用updateMonthLabels函数，传入第一个日期方格的日期
+        // 替换调用updateMonthLabels函数，传入第一个日期方格的日期
         updateMonthLabels(currentDate);
 
         // 更新统计结果
