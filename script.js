@@ -15,11 +15,18 @@ document.addEventListener("DOMContentLoaded", function() {
             const rows = data.split('\n');
             rows.forEach(row => {
                 const [date, startTime, endTime, hours] = row.split(',');
-                usageData[date] = {
-                    startTime: startTime, // 开机时间
-                    endTime: endTime,     // 关机时间
-                    hours: parseFloat(hours) // 使用时间
-                };
+                
+                // 检查 hours 是否有效
+                const parsedHours = parseFloat(hours);
+                if (!isNaN(parsedHours)) { // 确保 hours 是有效数字
+                    usageData[date] = {
+                        startTime: startTime, // 开机时间
+                        endTime: endTime,     // 关机时间
+                        hours: parsedHours // 使用时间
+                    };
+                } else {
+                    console.warn(`无效的使用时间: ${hours}，日期: ${date}`); // 输出警告信息
+                }
             });
             console.log(usageData); // 调试信息，查看数据是否正确
             if (!calendarGenerated) { // 只在第一次生成日历
@@ -45,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const months = [];
         let lastMonth = -1;
 
-        // 创建日期方格，从52周前的周日开始生成
+        // 创建日方格，从52周前的周日开始生成
         for (let i = 0; i < 52; i++) {
             const weekDiv = document.createElement("div");
             weekDiv.classList.add("week");
@@ -68,22 +75,25 @@ document.addEventListener("DOMContentLoaded", function() {
                 // 只显示今天及以前的日期
                 if (specificDate <= today) {
                     const dateString = specificDate.toISOString().split('T')[0];
-                    const usage = usageData[dateString].hours || 0;
+                    const usage = usageData[dateString] ? usageData[dateString] : { hours: 0, startTime: '', endTime: '' };
 
+                    // 根据使用时间设置颜色
                     let level = 0;
-                    if (usage > 0) level = 1;
-                    if (usage > 4) level = 2;
-                    if (usage > 8.75) level = 3;
-                    if (usage > 10.75) level = 4;
+                    if (usage.hours > 0) level = 1;
+                    if (usage.hours > 4) level = 2;
+                    if (usage.hours > 8.75) level = 3;
+                    if (usage.hours > 10.75) level = 4;
 
                     dayDiv.setAttribute("data-level", level);
                     dayDiv.setAttribute("data-date", dateString);
-                    dayDiv.setAttribute("data-usage", usage);
+                    dayDiv.setAttribute("data-usage", usage.hours);
+                    dayDiv.setAttribute("data-start-time", usage.startTime); // 设置开机时间
+                    dayDiv.setAttribute("data-end-time", usage.endTime); // 设置关机时间
 
                     // 统计使用天数和小时数
-                    if (usage > 0) {
+                    if (usage.hours > 0) {
                         totalDays++;
-                        totalHours += usage;
+                        totalHours += usage.hours;
                     }
 
                     // 工具提示功能
@@ -95,8 +105,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
                         // 更新工具提示内容
                         tooltip.innerText = `${date}\n开机时间: ${startTime}\n关机时间: ${endTime}\n使用时间: ${usage} hours`;
-                        tooltip.style.left = `${this.getBoundingClientRect().left + window.scrollX}px`;
-                        tooltip.style.top = `${this.getBoundingClientRect().top + window.scrollY - 30}px`;
+                        
+                        // 计算工具提示位置
+                        const rect = this.getBoundingClientRect();
+                        tooltip.style.left = `${rect.left + window.scrollX + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`; // 居中
+                        tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`; // 在方格上方，留出5px的间距
                         tooltip.classList.add("show");
                     });
 
