@@ -1,0 +1,78 @@
+import datetime  # 修改为只导入datetime模块
+import requests
+import os
+import csv
+from datetime import timedelta
+import base64  # 添加导入base64模块
+
+# 获取当前日期和时间
+now = datetime.datetime.now()  # 修改为使用datetime模块中的datetime类
+date_str = now.strftime("%Y-%m-%d")
+time_str = now.strftime("%H:%M:%S")
+
+# CSV文件路径
+csv_path = os.path.join(os.path.dirname(__file__), "usage_data.csv")  # 设置为脚本同一路径下
+
+# GitHub仓库信息
+token = "ghp_XXXXXXXXXXXXXXXXXXXXXXXX"  # 替换为您的GitHub访问令牌
+repo_name = "tilipinpin/workt"  # 替换为您的GitHub仓库名
+
+# 检查CSV文件是否存在,如果不存在则创建
+if not os.path.exists(csv_path):
+    with open(csv_path, mode='w', encoding='utf-8', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["日期", "开机时间", "关机时间", "使用时间"])
+
+# 读取现有的CSV
+with open(csv_path, mode='r', encoding='utf-8') as file:
+    reader = csv.DictReader(file)
+    csv_content = list(reader)
+
+# 检查今天的记录是否已存在
+today_record = next((row for row in csv_content if row["日期"] == date_str), None)
+
+if today_record is None:
+    # 如果今天的记录不存在,创建新记录
+    new_record = {
+        "日期": date_str,
+        "开机时间": time_str,
+        "关机时间": "",
+        "使用时间": ""
+    }
+    csv_content.append(new_record)
+else:
+    # 如果今天的记录已存在,更新最后一次关机时间
+    today_record["关机时间"] = time_str
+    
+    # 计算使用时间
+    start_time = datetime.datetime.strptime(date_str + " " + today_record["开机时间"], "%Y-%m-%d %H:%M:%S")
+    end_time = now if time_str != "00:00:00" else now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    usage_time = (end_time - start_time).total_seconds() / 3600
+    today_record["使用时间"] = f"{usage_time:.2f}"
+
+# 将更新后的内容写回CSV文件
+with open(csv_path, mode='w', encoding='utf-8', newline='') as file:
+    writer = csv.DictWriter(file, fieldnames=["日期", "开机时间", "关机时间", "使用时间"])  # 修正字段名
+    writer.writeheader()
+    writer.writerows(csv_content)
+
+# 获取当前文件SHA
+url = "https://api.github.com/repos/tilipinpin/workt/contents/date/usage_data.csv"
+headers = {
+    "Authorization": f"token {token}"
+}
+response = requests.get(url, headers=headers)
+file_info = response.json()
+sha_value = file_info['sha']  # 获取SHA值
+
+# 更新文件
+with open(csv_path, 'rb') as file:
+    content = file.read()
+    update_url = f"https://api.github.com/repos/tilipinpin/workt/contents/date/usage_data.csv"
+    data = {
+        "message": f"更新计算机使用时间记录 - {date_str} {time_str}",
+        "content": base64.b64encode(content).decode('utf-8'),  # 修改为使用base64编码
+        "sha": sha_value  # 使用获取到的SHA值
+    }
+    response = requests.put(update_url, headers=headers, json=data)
+    print(response.json())
