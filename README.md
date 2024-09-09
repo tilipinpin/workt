@@ -1,6 +1,7 @@
 这是一个自动记录本地电脑使用时间的网站  
-1. 下载date文件下面的worktinglocaldate软件到本地电脑
+1. 下载date文件下面的my_datetime软件到本地电脑
 2. 设置本地电脑自动任务程序，运行下软件，触发器设置为开机和关机。
-3. 软件适应于WINDOWS10系统。
+3. 如果之前有CSV文件，请将文件放置于：D:\Program Files
+4. 软件适应于WINDOWS10系统。
 
 
