@@ -11,10 +11,10 @@ date_str = now.strftime("%Y-%m-%d")
 time_str = now.strftime("%H:%M:%S")
 
 # CSV文件路径
-csv_path = os.path.join(os.path.dirname(__file__), "usage_data.csv")  # 设置为脚本同一路径下
+csv_path = "D:\\Program Files\\usage_data.csv"  # Use double backslashes
 
 # GitHub仓库信息
-token = "ghp_XXXXXXXXXXXXXXXXXXXXXXXX"  # 替换为您的GitHub访问令牌
+token = "ghp_XXXXXXX"  # 替换为您的GitHub访问令牌
 repo_name = "tilipinpin/workt"  # 替换为您的GitHub仓库名
 
 # 检查CSV文件是否存在,如果不存在则创建
@@ -76,3 +76,4 @@ with open(csv_path, 'rb') as file:
     }
     response = requests.put(update_url, headers=headers, json=data)
     print(response.json())
+
