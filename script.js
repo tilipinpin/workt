@@ -44,8 +44,7 @@ document.addEventListener("DOMContentLoaded", function() {
         totalHours = 0;
 
         const today = new Date(); // 获取当前日期
-        const thisSunday = new Date(today);
-        thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
+        const thisSunday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - today.getUTCDay())); // 计算本周日
 
         let currentDate = new Date(thisSunday);
 
@@ -65,8 +64,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 const specificDate = new Date(currentDate);
 
                 // 检是需要添加月份标签
-                if (specificDate.getDate() <= 7 && specificDate.getDay() === 0) {
-                    const monthName = specificDate.toLocaleString('en-US', { month: 'short' });
+                if (specificDate.getUTCDate() <= 7 && specificDate.getUTCDay() === 0) {
+                    const monthName = specificDate.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
                     if (!months.includes(monthName)) {
                         months.push(monthName);
                     }
@@ -122,11 +121,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
 
                 weekDiv.appendChild(dayDiv);
-                currentDate.setDate(currentDate.getDate() + 1); // 生下一天
+                currentDate.setUTCDate(currentDate.getUTCDate() + 1); // 生下一天
             }
 
             weeksContainer.prepend(weekDiv); // 从右向左插入
-            currentDate.setDate(currentDate.getDate() - 14);  // 回到上周日
+            currentDate.setUTCDate(currentDate.getUTCDate() - 14);  // 回到上周日
         }
 
         // 替换调用updateMonthLabels函数，传入第一个日期方格的日期
@@ -164,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let monthsAdded = new Set();
 
         for (let i = 0; i < 53; i++) { // 53周以确保覆盖整个年份
-            const monthIndex = currentDate.getMonth();
+            const monthIndex = currentDate.getUTCMonth();
             if (monthIndex !== lastMonth && !monthsAdded.has(monthIndex)) {
                 const monthDiv = document.createElement('div');
                 monthDiv.textContent = months[monthIndex];
@@ -174,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 lastMonth = monthIndex;
                 monthsAdded.add(monthIndex);
             }
-            currentDate.setDate(currentDate.getDate() + 7); // 移动到下一周
+            currentDate.setUTCDate(currentDate.getUTCDate() + 7); // 移动到下一周
 
             // 如果已经添加了12个月份，就退出循环
             if (monthsAdded.size === 12) {
