@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
@@ -45,10 +44,12 @@ document.addEventListener("DOMContentLoaded", function() {
         totalHours = 0;
 
         const today = new Date(); // 获取当前日期
+        today.setHours(today.getHours() + 8); // 将时间调整为中国时区
         const thisSunday = new Date(today);
         thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
 
         let currentDate = new Date(thisSunday);
+        currentDate.setDate(currentDate.getDate() ); // 提前一天生成方格
 
         const months = [];
         let lastMonth = -1;
