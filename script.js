@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
@@ -45,8 +46,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const today = new Date(); // 获取当前日期
         const thisSunday = new Date(today);
-        thisSunday.setHours(today.getHours() + 8); // 将时间调整为中国时间
-        thisSunday.setDate(today.getDate() - thisSunday.getDay()); // 计算本周日
+        thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
 
         let currentDate = new Date(thisSunday);
 
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 // 检是需要添加月份标签
                 if (specificDate.getDate() <= 7 && specificDate.getDay() === 0) {
-                    const monthName = specificDate.toLocaleString('en-US', { month: 'short', timeZone: 'Asia/Shanghai' });
+                    const monthName = specificDate.toLocaleString('en-US', { month: 'short' });
                     if (!months.includes(monthName)) {
                         months.push(monthName);
                     }
