@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function() {
         thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
 
         let currentDate = new Date(thisSunday);
-        currentDate.setDate(currentDate.getDate() ); // 提前一天生成方格
+        currentDate.setHours(8, 0, 0, 0); // 设置为午夜（00:00:00.000）
 
         const months = [];
         let lastMonth = -1;
@@ -172,6 +172,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 monthDiv.textContent = months[monthIndex];
                 monthDiv.style.flex = '1'; // 使月份标签均匀分布
                 monthDiv.style.textAlign = 'center';
+                monthDiv.style.width = 'calc(100% / 7)'; // 确保标签宽度与方格一致
                 monthsContainer.appendChild(monthDiv);
                 lastMonth = monthIndex;
                 monthsAdded.add(monthIndex);
