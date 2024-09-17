@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const squareWidth = 11; // 每个方格的宽度
         const squareMargin = 1.75; // 方格之间的间距
-        const labelOffset = 400; // 标签左偏移量
+        const labelOffset = 35; // 标签左偏移量
         const topOffset = 60; // 标签上下偏移量，可以调整这个值
 
         for (let i = 0; i < 53; i++) {
