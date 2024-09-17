@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
@@ -167,8 +168,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const squareWidth = 11; // 每个方格的宽度
         const squareMargin = 1.75; // 方格之间的间距
-        const labelOffset = 200; // 标签左偏移量
-        const topOffset = 60; // 标签上下偏移量，可以调整这个值
+        const labelOffset = 30; // 标签左偏移量
+        const topOffset = 10; // 标签上下偏移量，可以调整这个值
 
         for (let i = 0; i < 53; i++) {
             const monthIndex = currentDate.getMonth();
