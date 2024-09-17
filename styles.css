@@ -18,17 +18,17 @@ body {
 }
 
 .months {
-    display: flex;
-    justify-content: space-between;
+    position: relative;
+    height: 20px;
     margin-bottom: 5px;
 }
 
 .months div {
-    flex: 1; /* 使月份标签均匀分布 */
-    text-align: center;
-    font-size: 12px; /* 与星期字体大小一致 */
-    font-weight: normal; /* 确保字体不加粗 */
-    color: #767676; /* 与星期字体颜色一致 */
+    position: absolute;
+    font-size: 12px;
+    font-weight: normal;
+    color: #767676;
+    white-space: nowrap; /* 防止文本换行 */
 }
 
 .content {
@@ -173,4 +173,3 @@ body {
         height: 8px;
     }
 }
-
