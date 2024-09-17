@@ -20,7 +20,6 @@ body {
 .months {
     display: flex;
     justify-content: space-between;
-    padding-left: 20px; /* 为星期标签留出空间 */
     margin-bottom: 5px;
 }
 
