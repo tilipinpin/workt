@@ -162,27 +162,27 @@ document.addEventListener("DOMContentLoaded", function() {
         monthsContainer.innerHTML = ''; // 清空现有标签
 
         let currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() - 364); // 从一年前开始
         let lastMonth = -1;
-        let monthsAdded = new Set();
 
-        for (let i = 0; i < 53; i++) { // 53周以确保覆盖整个年份
+        const squareWidth = 11; // 每个方格的宽度
+        const squareMargin = 1.75; // 方格之间的间距
+        const labelOffset = 400; // 标签左偏移量
+        const topOffset = 60; // 标签上下偏移量，可以调整这个值
+
+        for (let i = 0; i < 53; i++) {
             const monthIndex = currentDate.getMonth();
-            if (monthIndex !== lastMonth && !monthsAdded.has(monthIndex)) {
+            if (monthIndex !== lastMonth && currentDate.getDay() === 0) {
                 const monthDiv = document.createElement('div');
                 monthDiv.textContent = months[monthIndex];
-                monthDiv.style.flex = '1'; // 使月份标签均匀分布
-                monthDiv.style.textAlign = 'center';
-                monthDiv.style.width = 'calc(100% / 7)'; // 确保标签宽度与方格一致
+                const leftOffset = i * (squareWidth + squareMargin) + labelOffset;
+                monthDiv.style.left = `${leftOffset}px`;
+                monthDiv.style.top = `${topOffset}px`; // 直接设置 top 值
+                monthDiv.style.position = 'absolute'; // 确保绝对定位
                 monthsContainer.appendChild(monthDiv);
                 lastMonth = monthIndex;
-                monthsAdded.add(monthIndex);
             }
-            currentDate.setDate(currentDate.getDate() + 7); // 移动到下一周
-
-            // 如果已经添加了12个月份，就退出循环
-            if (monthsAdded.size === 12) {
-                break;
-            }
+            currentDate.setDate(currentDate.getDate() + 7);
         }
     }
 
