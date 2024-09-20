@@ -1,0 +1,80 @@
+import datetime
+import requests
+import base64
+import os
+
+
+# 获取当前日期和时间
+now = datetime.datetime.now()
+date_str = now.strftime("%Y-%m-%d")
+time_str = now.strftime("%H:%M:%S")
+
+# GitHub仓库信息
+token = "ghp_XXXXXXXXXXXXXXX"  # 替换为您的GitHub访问令牌
+repo_name = "tilipinpin/workt"  # 替换为您的GitHub仓库名
+file_path = "date/usage_data.csv"  # GitHub上文件的相对路径
+
+# 获取当前文件SHA
+url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
+headers = {
+    "Authorization": f"token {token}"
+}
+response = requests.get(url, headers=headers)
+file_info = response.json()
+
+# 获取SHA值
+sha_value = file_info['sha']
+
+# 获取远程文件内容
+file_content = base64.b64decode(file_info['content']).decode('utf-8')
+lines = file_content.strip().split("\n")
+
+# 检查今天是否已有记录
+today_record = None
+for line in lines[1:]:  # 忽略第一行表头
+    record_date = line.split(',')[0]
+    if record_date == date_str:
+        today_record = line
+        break
+
+# 处理今天的记录
+if today_record is None:
+    # 如果今天没有记录，创建新的记录并追加上传
+    new_record = f"{date_str},{time_str},,"
+    lines.append(new_record)
+else:
+    # 如果今天已有记录，更新关机时间和使用时间
+    parts = today_record.split(',')
+    start_time = parts[1]
+    parts[2] = time_str  # 更新关机时间
+
+    # 计算使用时间
+    start_time_obj = datetime.datetime.strptime(f"{date_str} {start_time}", "%Y-%m-%d %H:%M:%S")
+    usage_time = (now - start_time_obj).total_seconds() / 3600
+    parts[3] = f"{usage_time:.2f}"  # 更新使用时间
+    updated_record = ','.join(parts)
+    
+    # 更新今天的记录
+    lines[lines.index(today_record)] = updated_record
+
+# 将当天的更新记录编码为base64
+new_file_content = '\n'.join(lines)
+encoded_content = base64.b64encode(new_file_content.encode('utf-8')).decode('utf-8')
+
+# 更新文件到GitHub
+update_url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
+data = {
+    "message": f"更新计算机使用时间记录 - {date_str}",
+    "content": encoded_content,
+    "sha": sha_value  # 使用获取到的SHA值
+}
+response = requests.put(update_url, headers=headers, json=data)
+
+# 打印结果
+if response.status_code == 200:
+    print("更新成功！")
+else:
+    print(f"更新失败，错误: {response.status_code}, 详细信息: {response.json()}")
+
+# 运行完程序后关机
+os.system("shutdown /s /t 1")  # 立即关机
