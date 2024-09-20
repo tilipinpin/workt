@@ -14,3 +14,8 @@
 试过用自动任务程序监听关机触发shutdown，也用过关机钩子，时灵时不灵。
 
 
+pyinstaller --onefile --icon=shutdown.ico myshutdown.py
+pyinstaller --onefile --icon=my_datetime.ico my_datetime.py
+
+# 运行完程序后关机
+os.system("shutdown /s /t 1")  # 立即关机
