@@ -1,9 +1,9 @@
-**这是一个自动记录本地电脑使用时间的网站**  
+## 自动记录本地电脑使用时间的网站 
 
 提前部署好网站，如果不会请上网找教程；    
 
 
-  **下面是收据数据既更新数据的步骤；**
+  ## 设置步骤步骤；
 1. 下载date文件下面的my_datetime软件到本地电脑。   
 2. 设置本地电脑自动任务程序，触发器设置为登录时，常规：只在用户登录时，使用最高权限运行，触发器：特定的用户，延迟任务1分钟，已经启用（B），
    条件：全部取消，设置：允许按需运行任务，记录并更新开机时间。  
@@ -12,11 +12,13 @@
 5. 软件适应于WINDOWS10系统，其他版本未知 。
 试过用自动任务程序监听关机触发shutdown，也用过关机钩子，时灵时不灵。
 
+python打包程序代码段
 
 pyinstaller --onefile --icon=shutdown.ico myshutdown.py
 pyinstaller --onefile --icon=my_datetime.ico my_datetime.py
 
-# 运行完程序后关机
+运行完程序后关机代码段
+
 import os
 
 os.system("shutdown /s /t 1")  # 立即关机
