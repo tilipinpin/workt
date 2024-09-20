@@ -9,8 +9,7 @@
    条件：全部取消，设置：允许按需运行任务，记录并更新开机时间。  
 4. 下载date文件下面的myshutdown软件到本地电脑,使用该程序关机，记录并更新关机时间；
    为防止使用系统关机按钮错过软件运行，取消开始处的关机按钮，将软件图标添加至开始处。  
-6. 如果想保留历史记录CSV文件，请将文件放置于：D:\Program Files；  
-7. 软件适应于WINDOWS10系统，其他版本未知 。
+5. 软件适应于WINDOWS10系统，其他版本未知 。
 试过用自动任务程序监听关机触发shutdown，也用过关机钩子，时灵时不灵。
 
 
@@ -18,4 +17,6 @@ pyinstaller --onefile --icon=shutdown.ico myshutdown.py
 pyinstaller --onefile --icon=my_datetime.ico my_datetime.py
 
 # 运行完程序后关机
+import os
+
 os.system("shutdown /s /t 1")  # 立即关机
