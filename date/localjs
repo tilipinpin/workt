@@ -1,79 +1,76 @@
-import datetime  # 修改为只导入datetime模块
+import datetime
 import requests
-import os
-import csv
-from datetime import timedelta
-import base64  # 添加导入base64模块
+import base64
 
 # 获取当前日期和时间
-now = datetime.datetime.now()  # 修改为使用datetime模块中的datetime类
+now = datetime.datetime.now()
 date_str = now.strftime("%Y-%m-%d")
 time_str = now.strftime("%H:%M:%S")
 
-# CSV文件路径
-csv_path = "D:\\Program Files\\usage_data.csv"  # Use double backslashes
-
 # GitHub仓库信息
-token = "ghp_XXXXXXX"  # 替换为您的GitHub访问令牌
+token = "ghp_XXXXXXXXXXXXXXXXXX"  # 替换为您的GitHub访问令牌
 repo_name = "tilipinpin/workt"  # 替换为您的GitHub仓库名
-
-# 检查CSV文件是否存在,如果不存在则创建
-if not os.path.exists(csv_path):
-    with open(csv_path, mode='w', encoding='utf-8', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["日期", "开机时间", "关机时间", "使用时间"])
-
-# 读取现有的CSV
-with open(csv_path, mode='r', encoding='utf-8') as file:
-    reader = csv.DictReader(file)
-    csv_content = list(reader)
-
-# 检查今天的记录是否已存在
-today_record = next((row for row in csv_content if row["日期"] == date_str), None)
-
-if today_record is None:
-    # 如果今天的记录不存在,创建新记录
-    new_record = {
-        "日期": date_str,
-        "开机时间": time_str,
-        "关机时间": "",
-        "使用时间": ""
-    }
-    csv_content.append(new_record)
-else:
-    # 如果今天的记录已存在,更新最后一次关机时间
-    today_record["关机时间"] = time_str
-    
-    # 计算使用时间
-    start_time = datetime.datetime.strptime(date_str + " " + today_record["开机时间"], "%Y-%m-%d %H:%M:%S")
-    end_time = now if time_str != "00:00:00" else now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-    usage_time = (end_time - start_time).total_seconds() / 3600
-    today_record["使用时间"] = f"{usage_time:.2f}"
-
-# 将更新后的内容写回CSV文件
-with open(csv_path, mode='w', encoding='utf-8', newline='') as file:
-    writer = csv.DictWriter(file, fieldnames=["日期", "开机时间", "关机时间", "使用时间"])  # 修正字段名
-    writer.writeheader()
-    writer.writerows(csv_content)
+file_path = "date/usage_data.csv"  # GitHub上文件的相对路径
 
 # 获取当前文件SHA
-url = "https://api.github.com/repos/tilipinpin/workt/contents/date/usage_data.csv"
+url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
 headers = {
     "Authorization": f"token {token}"
 }
 response = requests.get(url, headers=headers)
 file_info = response.json()
-sha_value = file_info['sha']  # 获取SHA值
 
-# 更新文件
-with open(csv_path, 'rb') as file:
-    content = file.read()
-    update_url = f"https://api.github.com/repos/tilipinpin/workt/contents/date/usage_data.csv"
-    data = {
-        "message": f"更新计算机使用时间记录 - {date_str} {time_str}",
-        "content": base64.b64encode(content).decode('utf-8'),  # 修改为使用base64编码
-        "sha": sha_value  # 使用获取到的SHA值
-    }
-    response = requests.put(update_url, headers=headers, json=data)
-    print(response.json())
+# 获取SHA值
+sha_value = file_info['sha']
+
+# 获取远程文件内容
+file_content = base64.b64decode(file_info['content']).decode('utf-8')
+lines = file_content.strip().split("\n")
+
+# 检查今天是否已有记录
+today_record = None
+for line in lines[1:]:  # 忽略第一行表头
+    record_date = line.split(',')[0]
+    if record_date == date_str:
+        today_record = line
+        break
+
+# 处理今天的记录
+if today_record is None:
+    # 如果今天没有记录，创建新的记录并追加上传
+    new_record = f"{date_str},{time_str},,"
+    lines.append(new_record)
+else:
+    # 如果今天已有记录，更新关机时间和使用时间
+    parts = today_record.split(',')
+    start_time = parts[1]
+    parts[2] = time_str  # 更新关机时间
+
+    # 计算使用时间
+    start_time_obj = datetime.datetime.strptime(f"{date_str} {start_time}", "%Y-%m-%d %H:%M:%S")
+    usage_time = (now - start_time_obj).total_seconds() / 3600
+    parts[3] = f"{usage_time:.2f}"  # 更新使用时间
+    updated_record = ','.join(parts)
+    
+    # 更新今天的记录
+    lines[lines.index(today_record)] = updated_record
+
+# 将当天的更新记录编码为base64
+new_file_content = '\n'.join(lines)
+encoded_content = base64.b64encode(new_file_content.encode('utf-8')).decode('utf-8')
+
+# 更新文件到GitHub
+update_url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
+data = {
+    "message": f"更新计算机使用时间记录 - {date_str}",
+    "content": encoded_content,
+    "sha": sha_value  # 使用获取到的SHA值
+}
+response = requests.put(update_url, headers=headers, json=data)
+
+# 打印结果
+if response.status_code == 200:
+    print("更新成功！")
+else:
+    print(f"更新失败，错误: {response.status_code}, 详细信息: {response.json()}")
 
