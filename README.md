@@ -13,8 +13,8 @@
   ### 试过用自动任务程序监听关机触发shutdown，也用过关机钩子，时灵时不灵。
 
 打包代码见data文件
-python打包程序代码段：
-pyinstaller --onefile --icon=shutdown.ico myshutdown.py
-pyinstaller --onefile --icon=my_datetime.ico my_datetime.py
+python打包程序代码段：  
+pyinstaller --onefile --icon=shutdown.ico myshutdown.py   
+pyinstaller --onefile --icon=my_datetime.ico my_datetime.py  
 
 
