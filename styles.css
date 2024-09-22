@@ -69,7 +69,7 @@ body {
     width: 10px;
     height: 10px;
     margin: 1.5px;
-    background-color: #ebedf0;
+    background-color: #ebeaf0;
     border-radius: 1.5px;
     position: relative;
 }
@@ -131,7 +131,7 @@ body {
     border-radius: 1.5px;
 }
 
-.legend-square[data-level="0"] { background-color: #ebedf0; }
+.legend-square[data-level="0"] { background-color: #ebeaf0; }
 .legend-square[data-level="1"] { background-color: #c6e48b; }
 .legend-square[data-level="2"] { background-color: #74c967; }
 .legend-square[data-level="3"] { background-color: #309f46; }
