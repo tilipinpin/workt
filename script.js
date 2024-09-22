@@ -161,32 +161,34 @@ document.addEventListener("DOMContentLoaded", function() {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         monthsContainer.innerHTML = ''; // 清空现有标签
 
-        let currentDate = new Date(startDate);
-        currentDate.setDate(currentDate.getDate() - 364); // 从一年前开始
-        let lastMonth = -1;
-
         const updateLabels = () => {
             monthsContainer.innerHTML = ''; // 清空现有标签
             const containerWidth = weeksContainer.offsetWidth;
-            const squareWidth = containerWidth / 53; // 动态计算方格宽度
-            const labelOffset = 30; // 标签左偏移量
+            const squareWidth = containerWidth / 52; // 动态计算方格宽度
+            const labelOffset = 19; // 标签左偏移量
             const topOffset = 10; // 标签上下偏移量
 
-            currentDate = new Date(startDate);
-            currentDate.setDate(currentDate.getDate() - 364);
-            lastMonth = -1;
+            let currentDate = new Date(startDate);
+            currentDate.setDate(currentDate.getDate() - 364); // 从一年前开始
+            let lastMonth = -1;
 
             for (let i = 0; i < 53; i++) {
                 const monthIndex = currentDate.getMonth();
                 if (monthIndex !== lastMonth && currentDate.getDay() === 0) {
-                    const monthDiv = document.createElement('div');
-                    monthDiv.textContent = months[monthIndex];
-                    const leftOffset = i * squareWidth + labelOffset;
-                    monthDiv.style.left = `${leftOffset}px`;
-                    monthDiv.style.top = `${topOffset}px`;
-                    monthDiv.style.position = 'absolute';
-                    monthsContainer.appendChild(monthDiv);
-                    lastMonth = monthIndex;
+                    // 检查是否是本月的第一个或第二个周日
+                    const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
+                    const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
+                    
+                    if (daysSinceMonthStart < 14) { // 允许月份的前两个周日
+                        const monthDiv = document.createElement('div');
+                        monthDiv.textContent = months[monthIndex];
+                        const leftOffset = i * squareWidth + labelOffset;
+                        monthDiv.style.left = `${leftOffset}px`;
+                        monthDiv.style.top = `${topOffset}px`;
+                        monthDiv.style.position = 'absolute';
+                        monthsContainer.appendChild(monthDiv);
+                        lastMonth = monthIndex;
+                    }
                 }
                 currentDate.setDate(currentDate.getDate() + 7);
             }
