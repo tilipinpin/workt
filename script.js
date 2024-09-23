@@ -45,6 +45,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const today = new Date(); // 获取当前日期
         today.setHours(today.getHours() + 8); // 将时间调整为中国时区
+        const startOfYear = new Date(today.getFullYear(), 0, 1); // 获取当年1月1日
+
+        let yearTotalDays = 0;
+        let yearTotalHours = 0;
+
         const thisSunday = new Date(today);
         thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
 
@@ -59,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const weekDiv = document.createElement("div");
             weekDiv.classList.add("week");
 
-            // 生成一周的日期方格，从周日到周
+            // 生成一周的日期方格，从周日到周六
             for (let j = 0; j < 7; j++) {
                 const dayDiv = document.createElement("div");
                 dayDiv.classList.add("day");
@@ -92,10 +97,10 @@ document.addEventListener("DOMContentLoaded", function() {
                     dayDiv.setAttribute("data-start-time", usage.startTime); // 设置开机时间
                     dayDiv.setAttribute("data-end-time", usage.endTime); // 设置关机时间
 
-                    // 统计使用天数和小时数
-                    if (usage.hours > 0) {
-                        totalDays++;
-                        totalHours += usage.hours;
+                    // 统计当年的使用天数和小时数
+                    if (usage.hours > 0 && specificDate >= startOfYear && specificDate <= today) {
+                        yearTotalDays++;
+                        yearTotalHours += usage.hours;
                     }
 
                     // 工具提示功能
@@ -135,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateMonthLabels(currentDate);
 
         // 更新统计结果
-        updateStats(totalDays, totalHours);
+        updateStats(yearTotalDays, yearTotalHours);
     }
 
     let totalDays = 0;
@@ -144,8 +149,9 @@ document.addEventListener("DOMContentLoaded", function() {
     function updateStats(days, hours) {
         const statsContainer = document.createElement('div');
         statsContainer.classList.add('stats-container');
+        const currentYear = new Date().getFullYear();
         statsContainer.innerHTML = `
-           <span>最近一年——${days}天——${hours.toFixed(1)}小时</span>
+           <span>${days} working days in ${currentYear}——${hours.toFixed(1)}hours</span>
         `;
         calendar.appendChild(statsContainer);
     }
