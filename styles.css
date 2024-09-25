@@ -154,7 +154,7 @@ body {
 .legend-square[data-level="2"] { background-color: #74c967; }
 .legend-square[data-level="3"] { background-color: #309f46; }
 .legend-square[data-level="4"] { background-color: #1b662a; }
-.legend-square[data-level="5"] { background-color: #a5b029; }  /* 黄色 */
+.legend-square[data-level="5"] { background-color: #a5b029; }  
 
 .stats-container {
     font-size: 15px;
@@ -196,17 +196,19 @@ body {
     }
 
     .legend {
-        flex-direction: column;
-        align-items: flex-end;
+        flex-direction: row; /* 改回行方向 */
+        flex-wrap: nowrap; /* 防止换行 */
+        justify-content: flex-end; /* 右对齐 */
+        overflow-x: auto; /* 允许水平滚动 */
+        white-space: nowrap; /* 防止文本换行 */
     }
 
     .legend-business-trip {
-        margin-bottom: 10px;
-        margin-right: 0;
+        margin-bottom: 0; /* 移除底部边距 */
+        margin-right: 10px; /* 恢复右侧边距 */
     }
 
     .legend-main {
-        width: 100%;
-        justify-content: flex-end;
+        width: auto; /* 移除宽度限制 */
     }
 }
