@@ -51,7 +51,7 @@ body {
     height: 13px;
     font-size: 12px;
     color: #050505;
-    margin-top: -1.5px; /* 增加这一行 */
+    margin-top: -1.5px; /* 增加这一 */
     margin-bottom: 1px; /* 增加这一行 */
 }
 
@@ -92,7 +92,9 @@ body {
 }
 .day[data-level="5"] {
     background-color: #a5b029;  
+    text-align: left; /* 添加这一行 */
 }
+
 .day.future {
     visibility: hidden;
 }
@@ -120,12 +122,15 @@ body {
     margin-top: 10px;
     font-size: 12px;
     color: #242323;
+    white-space: nowrap; /* 防止文本换行 */
+    overflow-x: auto; /* 允许水平滚动 */
 }
 
 .legend-business-trip {
     display: flex;
     align-items: center;
     margin-right: 10px;
+    flex-shrink: 0; /* 防止缩小 */
 }
 
 .legend-business-trip .legend-square {
@@ -135,11 +140,13 @@ body {
 .legend-main {
     display: flex;
     align-items: center;
+    flex-shrink: 0; /* 防止缩小 */
 }
 
 .legend-squares {
     display: flex;
     margin: 0 5px;
+    flex-shrink: 0; /* 防止缩小 */
 }
 
 .legend-square {
