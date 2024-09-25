@@ -90,7 +90,9 @@ body {
 .day[data-level="4"] {
     background-color: #1b662a;
 }
-
+.day[data-level="5"] {
+    background-color: #a5b029;  
+}
 .day.future {
     visibility: hidden;
 }
@@ -120,9 +122,24 @@ body {
     color: #242323;
 }
 
+.legend-business-trip {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.legend-business-trip .legend-square {
+    margin-right: 5px;
+}
+
+.legend-main {
+    display: flex;
+    align-items: center;
+}
+
 .legend-squares {
     display: flex;
-    margin: 0 0px;
+    margin: 0 5px;
 }
 
 .legend-square {
@@ -137,6 +154,7 @@ body {
 .legend-square[data-level="2"] { background-color: #74c967; }
 .legend-square[data-level="3"] { background-color: #309f46; }
 .legend-square[data-level="4"] { background-color: #1b662a; }
+.legend-square[data-level="5"] { background-color: #a5b029; }  /* 黄色 */
 
 .stats-container {
     font-size: 15px;
@@ -175,5 +193,20 @@ body {
     .legend-square {
         width: 8px;
         height: 8px;
+    }
+
+    .legend {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .legend-business-trip {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+
+    .legend-main {
+        width: 100%;
+        justify-content: flex-end;
     }
 }
