@@ -58,7 +58,7 @@ body {
 .weeks {
     display: flex;
     flex-grow: 1;
-    flex-wrap: nowrap; /* 不换行 */
+    flex-wrap: nowrap; /* ���换行 */
 }
 
 .week {
@@ -129,7 +129,7 @@ body {
 .legend-business-trip {
     display: flex;
     align-items: center;
-    margin-right: 10px;
+    margin-right: 40px; /* 为整个 business trip 部分添加右侧间距 */
     flex-shrink: 0; /* 防止缩小 */
 }
 
@@ -218,4 +218,8 @@ body {
     .legend-main {
         width: auto; /* 移除宽度限制 */
     }
+}
+
+.business-trip-text {
+    margin-right: 20px; /* 您可以根据需要调整这个值 */
 }
