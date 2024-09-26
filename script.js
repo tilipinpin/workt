@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (usage.hours > 4) level = 2;
                     if (usage.hours > 8.7) level = 3;
                     if (usage.hours > 10.7) level = 4;
-                    if (usage.hours >= 12.1) level = 5;
+                    if (usage.hours >= 16) level = 5;
 
                     dayDiv.setAttribute("data-level", level);
                     dayDiv.setAttribute("data-date", dateString);
