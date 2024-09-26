@@ -42,8 +42,9 @@ document.addEventListener("DOMContentLoaded", function() {
         monthsContainer.innerHTML = '';
         totalDays = 0;
         totalHours = 0;
+        let daysOver16Hours = 0; // 统计大于等于16小时的天数
 
-        const today = new Date(); // 获取当前日期
+        const today = new Date();
         today.setHours(today.getHours() + 8); // 将时间调整为中国时区
         const startOfYear = new Date(today.getFullYear(), 0, 1); // 获取当年1月1日
 
@@ -99,9 +100,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     dayDiv.setAttribute("data-end-time", usage.endTime); // 设置关机时间
 
                     // 统计当年的使用天数和小时数
-                    if (usage.hours > 0 && specificDate >= startOfYear && specificDate <= today) {
-                        yearTotalDays++;
-                        yearTotalHours += usage.hours;
+                    if (specificDate >= startOfYear && specificDate <= today) {
+                        if (usage.hours > 0 && usage.hours < 16) {
+                            yearTotalDays++;
+                            yearTotalHours += usage.hours;
+                        }
+                        if (usage.hours >= 16) {
+                            daysOver16Hours++;
+                            yearTotalDays++; // 大于等于16小时的日期仍计入工作日，但不计入工作时间
+                        }
                     }
 
                     // 工具提示功能
@@ -141,13 +148,13 @@ document.addEventListener("DOMContentLoaded", function() {
         updateMonthLabels(currentDate);
 
         // 更新统计结果
-        updateStats(yearTotalDays, yearTotalHours);
+        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours);
     }
 
     let totalDays = 0;
     let totalHours = 0;
 
-    function updateStats(days, hours) {
+    function updateStats(days, hours, daysOver16Hours) {
         const statsContainer = document.createElement('div');
         statsContainer.classList.add('stats-container');
         const currentYear = new Date().getFullYear();
@@ -155,6 +162,13 @@ document.addEventListener("DOMContentLoaded", function() {
            <span>${days} working days in ${currentYear}——${hours.toFixed(1)}hours</span>
         `;
         calendar.appendChild(statsContainer);
+
+        // 更新图例
+        const legendBusinessTrip = document.querySelector('.legend-business-trip');
+        legendBusinessTrip.innerHTML = `
+            <div class="legend-square" data-level="5"></div>
+            <span class="business-trip-text">Business trip (${daysOver16Hours} days)</span>
+        `;
     }
 
     // 每24小时更新一次日历
