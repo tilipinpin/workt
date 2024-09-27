@@ -58,7 +58,7 @@ body {
 .weeks {
     display: flex;
     flex-grow: 1;
-    flex-wrap: nowrap; /* ���换行 */
+    flex-wrap: nowrap; /* 换行 */
 }
 
 .week {
@@ -222,4 +222,18 @@ body {
 
 .business-trip-text {
     margin-right: 20px; /* 您可以根据需要调整这个值 */
+}
+
+.hours-text {
+    font-size: 0.8em;
+    color: #309f46;
+}
+
+.days-over-16-text {
+    font-size: 0.8em; /* 缩小字号，您可以根据需要调整这个值 */
+    color: #a5b029; /* 改变颜色，您可以根据需要选择其他颜色 */
+}
+
+.legend-business-trip {
+    margin-right: 20px; /* 保持之前的右侧间距 */
 }
