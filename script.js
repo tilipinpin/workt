@@ -159,15 +159,15 @@ document.addEventListener("DOMContentLoaded", function() {
         statsContainer.classList.add('stats-container');
         const currentYear = new Date().getFullYear();
         statsContainer.innerHTML = `
-           <span>${days} working days in ${currentYear}——${hours.toFixed(1)}hours</span>
+           <span>${days} working days in ${currentYear}<span class="hours-text">（${hours.toFixed(1)}hours）</span></span>
         `;
         calendar.appendChild(statsContainer);
 
-        // 更新图例
+        // 更新图例（
         const legendBusinessTrip = document.querySelector('.legend-business-trip');
         legendBusinessTrip.innerHTML = `
             <div class="legend-square" data-level="5"></div>
-            <span class="business-trip-text">Business trip (${daysOver16Hours} days)</span>
+            <span class="business-trip-text">Business trip <span class="days-over-16-text">(${daysOver16Hours} days)</span></span>
         `;
     }
 
