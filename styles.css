@@ -109,6 +109,7 @@ body {
     pointer-events: none;
     font-size: 12px;
     transition: opacity 0.3s;
+    z-index: 1000; /* 确保工具提示在最上层 */
 }
 
 .tooltip.show {
