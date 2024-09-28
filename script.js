@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function() {
         totalDays = 0;
         totalHours = 0;
         let daysOver16Hours = 0; // 统计大于等于16小时的天数
+        let daysOver17Hours = 0; // 新增：统计大于等于17小时的天数
 
         const today = new Date();
         today.setHours(today.getHours() + 8); // 将时间调整为中国时区
@@ -91,7 +92,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (usage.hours > 4) level = 2;
                     if (usage.hours > 8.7) level = 3;
                     if (usage.hours > 10.7) level = 4;
-                    if (usage.hours >= 16) level = 5;
+                    if (usage.hours >= 16 && usage.hours < 17) level = 5;
+                    if (usage.hours >= 17) level = 6; // 新增：等级6
 
                     dayDiv.setAttribute("data-level", level);
                     dayDiv.setAttribute("data-date", dateString);
@@ -105,9 +107,13 @@ document.addEventListener("DOMContentLoaded", function() {
                             yearTotalDays++;
                             yearTotalHours += usage.hours;
                         }
-                        if (usage.hours >= 16) {
+                        if (usage.hours >= 16 && usage.hours < 17) {
                             daysOver16Hours++;
                             yearTotalDays++; // 大于等于16小时的日期仍计入工作日，但不计入工作时间
+                        }
+                        if (usage.hours >= 17) {
+                            daysOver17Hours++;
+                            // 不计入工作日和工作时间
                         }
                     }
 
@@ -148,22 +154,28 @@ document.addEventListener("DOMContentLoaded", function() {
         updateMonthLabels(currentDate);
 
         // 更新统计结果
-        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours);
+        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours);
     }
 
     let totalDays = 0;
     let totalHours = 0;
 
-    function updateStats(days, hours, daysOver16Hours) {
+    function updateStats(days, hours, daysOver16Hours, daysOver17Hours) {
         const statsContainer = document.createElement('div');
         statsContainer.classList.add('stats-container');
         const currentYear = new Date().getFullYear();
         statsContainer.innerHTML = `
-           <span>${days} working days in ${currentYear}<span class="hours-text">（${hours.toFixed(1)}hours）</span></span>
+           <span>${days} working days in ${currentYear}<span class="hours-text">(${hours.toFixed(1)} hours)</span></span>
         `;
         calendar.appendChild(statsContainer);
 
-        // 更新图例（
+        // Update legend
+        const legendLeave = document.querySelector('.legend-leave');
+        legendLeave.innerHTML = `
+            <div class="legend-square" data-level="6"></div>
+            <span class="leave-text">Days of leave <span class="days-over-17-text">(${daysOver17Hours} days)</span></span>
+        `;
+
         const legendBusinessTrip = document.querySelector('.legend-business-trip');
         legendBusinessTrip.innerHTML = `
             <div class="legend-square" data-level="5"></div>
