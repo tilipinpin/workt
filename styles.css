@@ -171,6 +171,7 @@ body {
     left: 0;
     padding: 10px;
     z-index: 1;
+    margin-right: 20px; /* 增加右侧间距 */
 }
 
 .container {
@@ -185,7 +186,7 @@ body {
 /* 响应式设计 */
 @media (max-width: 768px) {
     .months {
-        margin-bottom: 10px; /* 增加月份标签和日期方格之间的距离 */
+        margin-bottom: 10px; /* 增加月份标签和日期方格之间的距 */
     }
 
     .months div {
@@ -225,15 +226,46 @@ body {
 }
 
 .hours-text {
-    font-size: 0.8em;
+    font-size: 1em;
     color: #309f46;
 }
 
 .days-over-16-text {
-    font-size: 0.8em; /* 缩小字号，您可以根据需要调整这个值 */
+    font-size: 1em; /* 缩小字号，您可以根据需要调整这个值 */
     color: #a5b029; /* 改变颜色，您可以根据需要选择其他颜色 */
 }
 
 .legend-business-trip {
     margin-right: 20px; /* 保持之前的右侧间距 */
+}
+
+.day[data-level="6"] {
+    background-color: #f30606;  /* 红色 */
+}
+
+.legend-leave {
+    display: flex;
+    align-items: center;
+    margin-right: 40px; /* 增加右侧间距 */
+    flex-shrink: 0;
+}
+
+.legend-leave .legend-square {
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    border-radius: 1.5px;
+    background-color: #f30606;
+}
+
+.days-over-17-text {
+    font-size: 1em;
+    color: #f30606; /* 红色，与方块颜色一致 */
+}
+
+@media (max-width: 768px) {
+    .legend-leave, .legend-business-trip {
+        margin-bottom: 0;
+        margin-right: 10px; /* 在小屏幕上减少右侧间距 */
+    }
 }
