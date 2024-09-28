@@ -267,7 +267,6 @@ body {
 @media (max-width: 768px) {
     .legend-leave {
         margin-bottom: 0;
-        margin-right: 10px; /* 在小屏幕上减少右侧间距 */
     }
     
     .legend-leave .legend-square {
