@@ -276,6 +276,6 @@ body {
     }
     
     .days-over-17-text {
-        font-size: 0.8em; /* 在小屏幕上减小字体大小 */
+        font-size: 1em; /* 在小屏幕上减小字体大小 */
     }
 }
