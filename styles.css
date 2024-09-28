@@ -264,8 +264,17 @@ body {
 }
 
 @media (max-width: 768px) {
-    .legend-leave, .legend-business-trip {
+    .legend-leave {
         margin-bottom: 0;
         margin-right: 10px; /* 在小屏幕上减少右侧间距 */
+    }
+    
+    .legend-leave .legend-square {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .days-over-17-text {
+        font-size: 0.8em; /* 在小屏幕上减小字体大小 */
     }
 }
