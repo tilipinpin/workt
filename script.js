@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // 解析 CSV 数据
             const rows = data.split('\n');
             rows.forEach(row => {
-                const [date, startTime, endTime, hours] = row.split(',');
+                const [date, startTime, endTime, hours, businessTripAddress] = row.split(','); // 假设第四列是出差地址
                 
                 // 检查 hours 是否有效
                 const parsedHours = parseFloat(hours);
@@ -22,7 +22,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     usageData[date] = {
                         startTime: startTime, // 开机时间
                         endTime: endTime,     // 关机时间
-                        hours: parsedHours // 使用时间
+                        hours: parsedHours,   // 使用时间
+                        address: businessTripAddress // 出差地址
                     };
                 } else {
                     console.warn(`无效的使用时间: ${hours}，日期: ${date}`); // 输出警告信息
@@ -40,17 +41,14 @@ document.addEventListener("DOMContentLoaded", function() {
         // 清空现有内容
         weeksContainer.innerHTML = '';
         monthsContainer.innerHTML = '';
-        totalDays = 0;
-        totalHours = 0;
+        let yearTotalDays = 0;
+        let yearTotalHours = 0;
         let daysOver16Hours = 0; // 统计大于等于16小时的天数
         let daysOver17Hours = 0; // 新增：统计大于等于17小时的天数
 
         const today = new Date();
         today.setHours(today.getHours() + 8); // 将时间调整为中国时区
         const startOfYear = new Date(today.getFullYear(), 0, 1); // 获取当年1月1日
-
-        let yearTotalDays = 0;
-        let yearTotalHours = 0;
 
         const thisSunday = new Date(today);
         thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
@@ -73,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 const specificDate = new Date(currentDate);
 
-                // 检是需要添加月份标签
+                // 检查是否需要添加月份标签
                 if (specificDate.getDate() <= 7 && specificDate.getDay() === 0) {
                     const monthName = specificDate.toLocaleString('en-US', { month: 'short' });
                     if (!months.includes(monthName)) {
@@ -84,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 // 只显示今天及以前的日期
                 if (specificDate <= today) {
                     const dateString = specificDate.toISOString().split('T')[0];
-                    const usage = usageData[dateString] ? usageData[dateString] : { hours: 0, startTime: '', endTime: '' };
+                    const usage = usageData[dateString] ? usageData[dateString] : { hours: 0, startTime: '', endTime: '', address: '' };
 
                     // 根据使用时间设置颜色
                     let level = 0;
@@ -100,6 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     dayDiv.setAttribute("data-usage", usage.hours);
                     dayDiv.setAttribute("data-start-time", usage.startTime); // 设置开机时间
                     dayDiv.setAttribute("data-end-time", usage.endTime); // 设置关机时间
+                    dayDiv.setAttribute("data-address", usage.address); // 设置出差地址
 
                     // 统计当年的使用天数和小时数
                     if (specificDate >= startOfYear && specificDate <= today) {
@@ -123,10 +122,18 @@ document.addEventListener("DOMContentLoaded", function() {
                         const date = this.getAttribute("data-date");
                         const startTime = this.getAttribute("data-start-time"); // 获取开机时间
                         const endTime = this.getAttribute("data-end-time"); // 获取关机时间
+                        const businessTripAddress = this.getAttribute("data-address"); // 获取出差地址
 
                         // 更新工具提示内容
-                        tooltip.innerText = `${date}\n开机时间: ${startTime}\n关机时间: ${endTime}\n使用时间: ${usage} hours`;
+                        let tooltipContent = `${date}\n开机时间: ${startTime}\n关机时间: ${endTime}\n使用时间: ${usage} hours`;
                         
+                        // 如果存在出差地址且不为空，则添加到工具提示内容中
+                        if (businessTripAddress && businessTripAddress.trim() !== "") {
+                            tooltipContent += `\n出差地址: ${businessTripAddress}`; // 追加出差地址
+                        }
+
+                        tooltip.innerText = tooltipContent;
+
                         // 计算工具提示位置
                         const rect = this.getBoundingClientRect();
                         tooltip.style.left = `${rect.left + window.scrollX + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`; // 居中
@@ -156,9 +163,6 @@ document.addEventListener("DOMContentLoaded", function() {
         // 更新统计结果
         updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours);
     }
-
-    let totalDays = 0;
-    let totalHours = 0;
 
     function updateStats(days, hours, daysOver16Hours, daysOver17Hours) {
         const statsContainer = document.createElement('div');
