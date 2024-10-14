@@ -1,8 +1,6 @@
 import datetime
 import requests
 import base64
-import os
-
 
 # 获取当前日期和时间
 now = datetime.datetime.now()
@@ -10,7 +8,7 @@ date_str = now.strftime("%Y-%m-%d")
 time_str = now.strftime("%H:%M:%S")
 
 # GitHub仓库信息
-token = "ghp_XXXXXXXXXXXXXXX"  # 替换为您的GitHub访问令牌
+token = "ghp_XXXXX"  # 替换为您的GitHub访问令牌
 repo_name = "tilipinpin/workt"  # 替换为您的GitHub仓库名
 file_path = "date/usage_data.csv"  # GitHub上文件的相对路径
 
@@ -40,18 +38,19 @@ for line in lines[1:]:  # 忽略第一行表头
 # 处理今天的记录
 if today_record is None:
     # 如果今天没有记录，创建新的记录并追加上传
-    new_record = f"{date_str},{time_str},,"
+    new_record = f"{date_str},{time_str},,,"
     lines.append(new_record)
 else:
     # 如果今天已有记录，更新关机时间和使用时间
     parts = today_record.split(',')
     start_time = parts[1]
-    parts[2] = time_str  # 更新关机时间
+    parts[2] = time_str  # 更新关机时间 
 
     # 计算使用时间
     start_time_obj = datetime.datetime.strptime(f"{date_str} {start_time}", "%Y-%m-%d %H:%M:%S")
     usage_time = (now - start_time_obj).total_seconds() / 3600
-    parts[3] = f"{usage_time:.2f}"  # 更新使用时间
+    parts[3] = f"{usage_time:.2f}"  
+    parts.append("")  # 增加一列，内容为空
     updated_record = ','.join(parts)
     
     # 更新今天的记录
@@ -75,6 +74,7 @@ if response.status_code == 200:
     print("更新成功！")
 else:
     print(f"更新失败，错误: {response.status_code}, 详细信息: {response.json()}")
+
 
 # 运行完程序后关机
 os.system("shutdown /s /t 1")  # 立即关机
