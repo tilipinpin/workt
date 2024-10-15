@@ -1,6 +1,7 @@
 import datetime
 import requests
 import base64
+import os
 
 # 获取当前日期和时间
 now = datetime.datetime.now()
