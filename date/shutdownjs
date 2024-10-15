@@ -9,7 +9,7 @@ date_str = now.strftime("%Y-%m-%d")
 time_str = now.strftime("%H:%M:%S")
 
 # GitHub仓库信息
-token = "ghp_XXXXX"  # 替换为您的GitHub访问令牌
+token = "ghp_XXXXXXX"  # 替换为您的GitHub访问令牌
 repo_name = "tilipinpin/workt"  # 替换为您的GitHub仓库名
 file_path = "date/usage_data.csv"  # GitHub上文件的相对路径
 
@@ -38,7 +38,7 @@ for line in lines[1:]:  # 忽略第一行表头
 
 # 处理今天的记录
 if today_record is None:
-    # 如果今天没有记录，创建新的记录并追加上传
+    # 如果今天没记录，创建新的记录并追加上传
     new_record = f"{date_str},{time_str},,,"
     lines.append(new_record)
 else:
@@ -51,7 +51,11 @@ else:
     start_time_obj = datetime.datetime.strptime(f"{date_str} {start_time}", "%Y-%m-%d %H:%M:%S")
     usage_time = (now - start_time_obj).total_seconds() / 3600
     parts[3] = f"{usage_time:.2f}"  
-    parts.append("")  # 增加一列，内容为空
+    
+    # 检查是否已经添加过空列
+    if len(parts) < 5:  # 确保只在需要时添加
+        parts.append("")  # 增加一列，内容为空
+    
     updated_record = ','.join(parts)
     
     # 更新今天的记录
