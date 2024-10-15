@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         // 更新工具提示内容
                         let tooltipContent = `${date}\n开机时间: ${startTime}\n关机时间: ${endTime}\n使用时间: ${usage} hours`;
                         
-                        // 如果存在出差地址且不为空，则添加到工具提示内容中
+                        // 如果存在内容且不为空，则添加到工具提示内容中
                         if (businessTripAddress && businessTripAddress.trim() !== "") {
                             tooltipContent += `\n备注: ${businessTripAddress}`; // 追加出差地址
                         }
