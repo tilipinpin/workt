@@ -121,20 +121,24 @@ body {
     align-items: center;
     justify-content: flex-end;
     margin-top: 10px;
-    font-size: 12px;
-    color: #242323;
+    font-size: 12px; /* 保持原有的字体大小 */
+    color: #242323; /* 保持原有颜色 */
     white-space: nowrap; /* 防止文本换行 */
     overflow-x: auto; /* 允许水平滚动 */
 }
 
-.legend-business-trip {
+.legend-business-trip,
+.legend-leave,
+.legend-overtime {
     display: flex;
     align-items: center;
-    margin-right: 40px; /* 为整个 business trip 部分添加右侧间距 */
+    margin-right: 20px; /* 保持之前的右侧间距 */
     flex-shrink: 0; /* 防止缩小 */
 }
 
-.legend-business-trip .legend-square {
+.legend-business-trip .legend-square,
+.legend-leave .legend-square,
+.legend-overtime .legend-square {
     margin-right: 5px;
 }
 
@@ -142,6 +146,10 @@ body {
     display: flex;
     align-items: center;
     flex-shrink: 0; /* 防止缩小 */
+}
+
+.legend-main span {
+    font-size: 12px; /* 确保 "MORE" 和 "LESS" 的字体大小一致 */
 }
 
 .legend-squares {
@@ -187,7 +195,7 @@ body {
 /* 响应式设计 */
 @media (max-width: 768px) {
     .months {
-        margin-bottom: 10px; /* 增加月份标签和日期方格之间的距 */
+        margin-bottom: 10px; /* 增加月标签和日期方格之间的距 */
     }
 
     .months div {
@@ -222,22 +230,34 @@ body {
     }
 }
 
-.business-trip-text {
-    margin-right: 20px; /* 您可以根据需要调整这个值 */
+.days-over-16-text,
+.days-over-17-text,
+.business-trip-text,
+.overtime-text {
+    font-size: 12px; /* 确保加班、请假、出差的字体大小一致 */
 }
 
 .hours-text {
     font-size: 1em;
-    color: #309f46;
+    color: #309f46; /* 保持原有颜色 */
 }
 
 .days-over-16-text {
-    font-size: 1em; /* 缩小字号，您可以根据需要调整这个值 */
-    color: #a5b029; /* 改变颜色，您可以根据需要选择其他颜色 */
+    font-size: 1em; /* 保持原有大小 */
+    color: #1b662a; /* 保持原有颜色 */
 }
 
-.legend-business-trip {
+.days-over-17-text {
+    font-size: 1em; /* 保持原有大小 */
+    color: #f30606; /* 保持原有颜色 */
+}
+
+.business-trip-text {
     margin-right: 20px; /* 保持之前的右侧间距 */
+}
+
+.overtime-text {
+    color: #1b662a; /* 保持原有颜色 */
 }
 
 .day[data-level="6"] {
@@ -259,11 +279,6 @@ body {
     background-color: #f30606;
 }
 
-.days-over-17-text {
-    font-size: 1em;
-    color: #f30606; /* 红色，与方块颜色一致 */
-}
-
 @media (max-width: 768px) {
     .legend-leave {
         margin-bottom: 0;
@@ -277,4 +292,58 @@ body {
     .days-over-17-text {
         font-size: 1em; /* 在小屏幕上减小字体大小 */
     }
+}
+
+.legend-container {
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+    margin-top: 10px; /* 与日历内容之间的间距 */
+}
+
+.legend-square {
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    border-radius: 1.5px;
+}
+
+.legend-overtime {
+    display: flex;
+    align-items: center;
+    margin-right: 40px; /* 为加班图例添加右侧间距 */
+    flex-shrink: 0; /* 防止缩小 */
+}
+
+.legend-overtime .legend-square {
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    border-radius: 1.5px;
+    background-color: #1b662a; /* 加班图例的颜色 */
+}
+
+.legend-leave {
+    display: flex;
+    align-items: center;
+    margin-right: 40px; /* 增加右侧间距 */
+    flex-shrink: 0;
+}
+
+.legend-leave .legend-square {
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    border-radius: 1.5px;
+    background-color: #f30606; /* 请假图例的颜色 */
+}
+
+.legend-business-trip {
+    display: flex;
+    align-items: center;
+    margin-right: 20px; /* 保持之前的右侧间距 */
+    flex-shrink: 0; /* 防止缩小 */
+}
+
+.legend-business-trip .legend-square {
+    margin-right: 5px;
 }
