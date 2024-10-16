@@ -257,7 +257,7 @@ body {
 }
 
 .overtime-text {
-    color: #1b662a; /* 保持原有颜色 */
+    color: #242323; /* 保持原有颜色 */
 }
 
 .day[data-level="6"] {
