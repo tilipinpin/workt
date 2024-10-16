@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             weeksContainer.prepend(weekDiv); // 从右向左插入
-            currentDate.setDate(currentDate.getDate() - 14);  // 回到上周日
+            currentDate.setDate(currentDate.getDate() - 14);  // 回上周日
         }
 
         // 替换调用updateMonthLabels函数，传入第一个日期方格的日期
@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours);
     }
 
-    function updateStats(days, hours, daysOver16Hours, daysOver17Hours) {
+    function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays) {
         const statsContainer = document.createElement('div');
         statsContainer.classList.add('stats-container');
         const currentYear = new Date().getFullYear();
@@ -173,18 +173,25 @@ document.addEventListener("DOMContentLoaded", function() {
         `;
         calendar.appendChild(statsContainer);
 
-        // Update legend
-        const legendLeave = document.querySelector('.legend-leave');
-        legendLeave.innerHTML = `
-            <div class="legend-square" data-level="6"></div>
-            <span class="leave-text">Days of leave <span class="days-over-17-text">(${daysOver17Hours} days)</span></span>
+        // 新增加班统计图例
+        const legendOvertime = document.createElement('div');
+        legendOvertime.classList.add('legend-overtime');
+        const overtimeDaysCount = Object.values(usageData).filter(usage => usage.hours > 9 && usage.hours < 16).length; // 统计加班天数
+        legendOvertime.innerHTML = `
+            <div class="legend-square"></div>
+            <span class="overtime-text">Work Overtime <span class="days-over-16-text">(${overtimeDaysCount} days)</span></span>
         `;
 
+        // 更新请假图例
+        const legendLeave = document.querySelector('.legend-leave');
+        legendLeave.querySelector('.days-over-17-text').textContent = `(${daysOver17Hours} days)`;
+
+        // 更新出差图例
         const legendBusinessTrip = document.querySelector('.legend-business-trip');
-        legendBusinessTrip.innerHTML = `
-            <div class="legend-square" data-level="5"></div>
-            <span class="business-trip-text">Business trip <span class="days-over-16-text">(${daysOver16Hours} days)</span></span>
-        `;
+        legendBusinessTrip.querySelector('.days-over-16-text').textContent = `(${daysOver16Hours} days)`;
+
+        // 将加班图例插入到请假图例之前
+        legendLeave.parentNode.insertBefore(legendOvertime, legendLeave);
     }
 
     // 每24小时更新一次日历
