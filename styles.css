@@ -41,7 +41,7 @@ body {
 
 .weekdays {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* 默认情况下为列方向 */
     justify-content: space-between;
     padding-top: 0px; /* 为月份标签留出空间 */
     margin-right: 5px;
@@ -125,6 +125,7 @@ body {
     color: #242323; /* 保持原有颜色 */
     white-space: nowrap; /* 防止文本换行 */
     overflow-x: auto; /* 允许水平滚动 */
+    padding-left: 30px; /* 添加左边距以与上方第一列方格对齐 */
 }
 
 .legend-business-trip,
@@ -132,14 +133,14 @@ body {
 .legend-overtime {
     display: flex;
     align-items: center;
-    margin-right: 10px; /* 减少右侧间距以适应小屏幕 */
+    margin-right: 5px; /* 减少右侧间距以适应小屏幕 */
     flex-shrink: 0; /* 防止缩小 */
 }
 
 .legend-business-trip .legend-square,
 .legend-leave .legend-square,
 .legend-overtime .legend-square {
-    margin-right: 5px; /* 色块与文本之间的间距 */
+    margin-right: 3px; /* 色块与文本之间的间距 */
 }
 
 .legend-main {
@@ -154,7 +155,7 @@ body {
 
 .legend-squares {
     display: flex;
-    margin: 0 5px;
+    margin: 0 3px;
     flex-shrink: 0; /* 防止缩小 */
 }
 
@@ -218,6 +219,7 @@ body {
         justify-content: flex-start; /* 左对齐 */
         overflow-x: auto; /* 允许水平滚动 */
         white-space: nowrap; /* 防止文本换行 */
+        padding-left: 50px; /* 在小屏幕上减少左边距 */
     }
 
     .legend-business-trip {
@@ -253,11 +255,11 @@ body {
 }
 
 .business-trip-text {
-    margin-right: 10px; /* 减少右侧间距以适应小屏幕 */
+    margin-right: 5px; /* 保持之前的右侧间距 */
 }
 
 .overtime-text {
-    color: #242323; /* 保持原有颜色 */
+    color: #1b662a; /* 保持原有颜色 */
 }
 
 .day[data-level="6"] {
@@ -296,14 +298,14 @@ body {
 
 .legend-container {
     display: flex;
-    align-items: center; /* 垂直居���对齐 */
+    align-items: center; /* 垂直居对齐 */
     margin-top: 10px; /* 与日历内容之间的间距 */
 }
 
 .legend-square {
     width: 10px;
     height: 10px;
-    margin-right: 5px;
+    margin-right: 2.5px;
     border-radius: 1.5px;
 }
 
@@ -353,20 +355,21 @@ body {
     .legend {
         font-size: 10px; /* 缩小字体大小以适应小屏幕 */
         justify-content: space-between; /* 确保图例两端对齐 */
+        padding-left: 25px; /* 保持左边距 */
     }
 
     .legend-business-trip,
     .legend-leave,
     .legend-overtime {
-        margin-right: 5px; /* 进一步减少右侧间距 */
+        margin-right: 3px; /* 进一步减少右侧间距 */
     }
 
     .legend-main {
-        margin-right: 5px; /* 确保 "MORE" 和 "LESS" 之间的间距适当 */
+        margin-right: 3px; /* 确保 "MORE" 和 "LESS" 之间的间距适当 */
     }
 
     .legend-main .legend-square {
-        margin-right: 2px; /* 色块与色块之间的间距 */
+        margin-right: 1px; /* 减小色块与色块之间的间距 */
     }
 
     .legend-main span {
@@ -389,5 +392,39 @@ body {
     .legend-overtime .legend-square {
         width: 8px; /* 确保请假和加班图例的方块也缩小 */
         height: 8px; /* 确保请假和加班图例的方块也缩小 */
+    }
+}
+
+.weekdays {
+    display: flex;
+    flex-direction: column; /* 默认情况下为列方向 */
+    justify-content: space-between;
+    padding-top: 0px; /* 为月份标签留出空间 */
+    margin-right: 5px;
+}
+
+.weekdays div {
+    height: 13px;
+    font-size: 12px;
+    color: #050505;
+    margin-top: -1.5px; /* 增加这一 */
+    margin-bottom: 1px; /* 增加这一行 */
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .weekdays {
+        flex-direction: column; /* 在小屏幕上改为列方向 */
+        justify-content: flex-start; /* 确保星期标签从顶部开始排列 */
+        margin-right: 1; /* 移除右侧间距 */
+        padding-top: 5px; /* 为星期标签添加顶部间距 */
+    }
+
+    .weekdays div {
+        height: auto; /* 允许高度自适应 */
+        font-size: 10px; /* 调整小屏幕上的字体大小 */
+        margin-top: 2px; /* 增加顶部间距 */
+        margin-bottom: 3px; /* 增加底部间距 */
+        text-align: center; /* 使文本居中对齐 */
     }
 }
