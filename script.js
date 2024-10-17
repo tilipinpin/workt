@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         startTime: startTime, // 开机时间
                         endTime: endTime,     // 关机时间
                         hours: parsedHours,   // 使用时间
-                        address: businessTripAddress // 出差地址
+                        address: businessTripAddress // 备注信息
                     };
                 } else {
                     console.warn(`无效的使用时间: ${hours}，日期: ${date}`); // 输出警告信息
@@ -44,7 +44,8 @@ document.addEventListener("DOMContentLoaded", function() {
         let yearTotalDays = 0;
         let yearTotalHours = 0;
         let daysOver16Hours = 0; // 统计大于等于16小时的天数
-        let daysOver17Hours = 0; // 新增：统计大于等于17小时的天数
+        let daysOver17Hours = 0; // 统计大于等于17小时的天数
+        let overtimeDays = 0; // 新增：统计加班天数
 
         const today = new Date();
         today.setHours(today.getHours() + 8); // 将时间调整为中国时区
@@ -55,9 +56,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
         let currentDate = new Date(thisSunday);
         currentDate.setHours(8, 0, 0, 0); // 设置为午夜（00:00:00.000）
-
-        const months = [];
-        let lastMonth = -1;
 
         // 创建日方格，从52周前的周日开始生成
         for (let i = 0; i < 52; i++) {
@@ -70,14 +68,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 dayDiv.classList.add("day");
 
                 const specificDate = new Date(currentDate);
-
-                // 检查是否需要添加月份标签
-                if (specificDate.getDate() <= 7 && specificDate.getDay() === 0) {
-                    const monthName = specificDate.toLocaleString('en-US', { month: 'short' });
-                    if (!months.includes(monthName)) {
-                        months.push(monthName);
-                    }
-                }
 
                 // 只显示今天及以前的日期
                 if (specificDate <= today) {
@@ -113,6 +103,14 @@ document.addEventListener("DOMContentLoaded", function() {
                         if (usage.hours >= 17) {
                             daysOver17Hours++;
                             // 不计入工作日和工作时间
+                        }
+
+                        // 统计加班天数，条件是下班时间在17:30之后
+                        const endTime = new Date(`1970-01-01T${usage.endTime.split(':').slice(0, 2).join(':')}:00`); // 只取 HH:mm，并设置秒为 00
+                        const overtimeThreshold = new Date(`1970-01-01T17:30:00`); // 17:30 的时间
+                        console.log(`Date: ${dateString}, End Time: ${endTime}, Overtime Threshold: ${overtimeThreshold}`);
+                        if (endTime > overtimeThreshold) {
+                            overtimeDays++;
                         }
                     }
 
@@ -161,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateMonthLabels(currentDate);
 
         // 更新统计结果
-        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours);
+        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours, overtimeDays); // 传入 overtimeDays
     }
 
     function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays) {
@@ -176,10 +174,9 @@ document.addEventListener("DOMContentLoaded", function() {
         // 新增加班统计图例
         const legendOvertime = document.createElement('div');
         legendOvertime.classList.add('legend-overtime');
-        const overtimeDaysCount = Object.values(usageData).filter(usage => usage.hours > 9 && usage.hours < 16).length; // 统计加班天数
         legendOvertime.innerHTML = `
             <div class="legend-square"></div>
-            <span class="overtime-text">Work Overtime <span class="days-over-16-text">(${overtimeDaysCount} days)</span></span>
+            <span class="overtime-text">Work Overtime <span class="days-over-16-text">(${overtimeDays} days)</span></span>
         `;
 
         // 更新请假图例
