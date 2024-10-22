@@ -355,7 +355,7 @@ body {
     .legend {
         font-size: 10px; /* 缩小字体大小以适应小屏幕 */
         justify-content: space-between; /* 确保图例两端对齐 */
-        padding-left: 25px; /* 保持左边距 */
+        padding-left: 25px; /* 保持左距 */
     }
 
     .legend-business-trip,
@@ -428,3 +428,67 @@ body {
         text-align: center; /* 使文本居中对齐 */
     }
 }
+
+.year-selector {
+    display: flex;
+    flex-direction: column; /* 竖着排列 */
+    align-items: flex-start; /* 左对齐 */
+    position: relative; /* 改为相对定位 */
+    left: -80px; /* 将年份选择器放置在左侧 */
+    top: 170px; /* 根据需要调整顶部位置 */
+}
+
+.year {
+    padding: 4px; /* 增加内边距以提高点击区域 */
+    cursor: pointer;
+    border: 1px solid #ccc; /* 添加边框 */
+    border-radius: 3px; /* 圆角边框 */
+    margin: 3px 0; /* 增加上下间距 */
+    transition: background-color 0.3s, transform 0.2s; /* 添加过渡效果 */
+    font-size: 12px; /* 缩小字体 */
+    position: relative; /* 确保伪元素相对于年份标签定位 */
+}
+
+/* 选中时显示底纹 */
+.year.selected::after {
+    content: ''; /* 创建伪元素 */
+    position: absolute; /* 使用绝对定位 */
+    bottom: 0; /* 定位到底部 */
+    left: 0;
+    right: 0;
+    height: 6px; /* 设置底纹高度 */
+    background-color: green; /* 选中时底纹为绿色 */
+    border-radius: 0 0 3px 3px; /* 圆角 */
+}
+
+/* 悬停时不显示底纹 */
+.year:hover::after {
+    content: none; /* 不显示底纹 */
+}
+
+/* 悬停时的背景色和放大效果 */
+.year:hover {
+    background-color: #f0f0f0; /* 悬停时背景色 */
+    transform: scale(1.05); /* 悬停时放大效果 */
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .year {
+        font-size: 10px; /* 在小屏幕上缩小字体 */
+        padding: 2px; /* 减少内边距 */
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
