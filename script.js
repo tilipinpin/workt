@@ -57,8 +57,8 @@ document.addEventListener("DOMContentLoaded", function() {
         let currentDate = new Date(thisSunday);
         currentDate.setHours(8, 0, 0, 0); // 设置为午夜（00:00:00.000）
 
-        // 创建日方格，从52周前的周日开始生成
-        for (let i = 0; i < 52; i++) {
+        // 创建日方格，从53周前的周日开始生成
+        for (let i = 0; i < 53; i++) {
             const weekDiv = document.createElement("div");
             weekDiv.classList.add("week");
 
