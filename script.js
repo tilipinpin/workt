@@ -4,180 +4,212 @@ document.addEventListener("DOMContentLoaded", function() {
     const weeksContainer = document.querySelector(".weeks");
     const tooltip = document.getElementById("tooltip");
 
-    let usageData = {}; // 添加这行来存储使用数据
-    let calendarGenerated = false; // 添加此标志
+    let usageData = {};
+    let calendarGenerated = false;
 
-    // 从 GitHub 获取使用数据
+    // 添加年份选择器
+    const yearSelector = document.createElement('div');
+    yearSelector.className = 'year-selector';
+    document.querySelector('.container').insertBefore(yearSelector, calendar);
+
+    function generateYearSelector() {
+        const currentYear = new Date().getFullYear();
+        for (let i = 0; i < 4; i++) {
+            const year = currentYear - i;
+            const yearDiv = document.createElement('div');
+            yearDiv.classList.add('year');
+            yearDiv.textContent = year;
+            yearDiv.setAttribute('data-year', year);
+            yearSelector.appendChild(yearDiv);
+        }
+    }
+
+    generateYearSelector();
+
+    // 年份选择事件
+    yearSelector.addEventListener('click', function(event) {
+        if (event.target.classList.contains('year')) {
+            const selectedYear = parseInt(event.target.getAttribute('data-year'));
+            document.querySelectorAll('.year').forEach(y => y.classList.remove('selected'));
+            event.target.classList.add('selected');
+            generateCalendar(selectedYear, true);
+        }
+    });
+
+    // 数据加载逻辑
     fetch('https://raw.githubusercontent.com/tilipinpin/workt/main/date/usage_data.csv')
         .then(response => response.text())
         .then(data => {
-            // 解析 CSV 数据
             const rows = data.split('\n');
             rows.forEach(row => {
-                const [date, startTime, endTime, hours, businessTripAddress] = row.split(','); // 假设第四列是出差地址
-                
-                // 检查 hours 是否有效
+                const [date, startTime, endTime, hours, businessTripAddress] = row.split(',');
                 const parsedHours = parseFloat(hours);
-                if (!isNaN(parsedHours)) { // 确保 hours 是有效数字
-                    usageData[date] = {
-                        startTime: startTime, // 开机时间
-                        endTime: endTime,     // 关机时间
-                        hours: parsedHours,   // 使用时间
-                        address: businessTripAddress // 备注信息
+                if (!isNaN(parsedHours)) {
+                    const year = date.split('-')[0];
+                    if (!usageData[year]) {
+                        usageData[year] = {};
+                    }
+                    usageData[year][date] = {
+                        startTime: startTime,
+                        endTime: endTime,
+                        hours: parsedHours,
+                        address: businessTripAddress
                     };
                 } else {
-                    console.warn(`无效的使用时间: ${hours}，日期: ${date}`); // 输出警告信息
+                    console.warn(`无效的使用时间: ${hours}，日期: ${date}`);
                 }
             });
-            console.log(usageData); // 调试信息，查看数据是否正确
-            if (!calendarGenerated) { // 只在第一次生成日历
-                generateCalendar();
+            if (!calendarGenerated) {
+                generateCalendar(null, false); // 加载时生成当前日期往前53周的方格
                 calendarGenerated = true;
             }
         })
         .catch(error => console.error('Error:', error));
 
-    function generateCalendar() {
-        // 清空现有内容
+    function toChinaTime(date) {
+        // 将日期转换为中国时区（UTC+8）
+        const utcOffset = 8 * 60; // UTC+8 的分钟数
+        return new Date(date.getTime() + (utcOffset * 60 * 1000));
+    }
+
+    function generateCalendar(selectedYear, isYearSelected) {
         weeksContainer.innerHTML = '';
         monthsContainer.innerHTML = '';
         let yearTotalDays = 0;
         let yearTotalHours = 0;
-        let daysOver16Hours = 0; // 统计大于等于16小时的天数
-        let daysOver17Hours = 0; // 统计大于等于17小时的天数
-        let overtimeDays = 0; // 新增：统计加班天数
+        let daysOver16Hours = 0;
+        let daysOver17Hours = 0;
+        let overtimeDays = 0;
 
-        const today = new Date();
-        today.setHours(today.getHours() + 8); // 将时间调整为中国时区
-        const startOfYear = new Date(today.getFullYear(), 0, 1); // 获取当年1月1日
+        let startDate, endDate;
+        const today = toChinaTime(new Date()); // 获取今天的日期
+        if (isYearSelected && selectedYear) {
+            startDate = toChinaTime(new Date(selectedYear, 0, 1));
+            endDate = toChinaTime(new Date(selectedYear, 11, 31));
+        } else {
+            startDate = new Date(today);
+            startDate.setDate(startDate.getDate() - 364); // 从今天往前53周
+            endDate = today; // 结束日期为今天
+        }
 
-        const thisSunday = new Date(today);
-        thisSunday.setDate(today.getDate() - today.getDay()); // 计算本周日
+        // 确保从当前日期的周日开始生成方格
+        let currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从当前日期的周日开始
 
-        let currentDate = new Date(thisSunday);
-        currentDate.setHours(8, 0, 0, 0); // 设置为午夜（00:00:00.000）
-
-        // 创建日方格，从53周前的周日开始生成
-        for (let i = 0; i < 53; i++) {
+        while (currentDate <= endDate) {
             const weekDiv = document.createElement("div");
             weekDiv.classList.add("week");
 
-            // 生成一周的日期方格，从周日到周六
             for (let j = 0; j < 7; j++) {
                 const dayDiv = document.createElement("div");
                 dayDiv.classList.add("day");
 
-                const specificDate = new Date(currentDate);
+                const dateString = currentDate.toISOString().split('T')[0];
+                const year = currentDate.getFullYear();
+                const usage = usageData[year] && usageData[year][dateString] ? usageData[year][dateString] : { hours: 0, startTime: '', endTime: '', address: '' };
 
-                // 只显示今天及以前的日期
-                if (specificDate <= today) {
-                    const dateString = specificDate.toISOString().split('T')[0];
-                    const usage = usageData[dateString] ? usageData[dateString] : { hours: 0, startTime: '', endTime: '', address: '' };
-
-                    // 根据使用时间设置颜色
+                // 只生成属于选定年份的日期方格
+                if (isYearSelected && year !== selectedYear) {
+                    dayDiv.classList.add("future"); // 不属于选中年份的方格
+                } else if (currentDate > today) {
+                    // 不生成今天之后的方格
+                    dayDiv.classList.add("future"); // 可以选择添加样式以标识
+                } else {
+                    // 设置颜色等级和属性
                     let level = 0;
                     if (usage.hours > 0) level = 1;
                     if (usage.hours > 4) level = 2;
                     if (usage.hours > 8.7) level = 3;
                     if (usage.hours > 10.7) level = 4;
                     if (usage.hours >= 16 && usage.hours < 17) level = 5;
-                    if (usage.hours >= 17) level = 6; // 新增：等级6
+                    if (usage.hours >= 17) level = 6;
 
                     dayDiv.setAttribute("data-level", level);
                     dayDiv.setAttribute("data-date", dateString);
                     dayDiv.setAttribute("data-usage", usage.hours);
-                    dayDiv.setAttribute("data-start-time", usage.startTime); // 设置开机时间
-                    dayDiv.setAttribute("data-end-time", usage.endTime); // 设置关机时间
-                    dayDiv.setAttribute("data-address", usage.address); // 设置出差地址
+                    dayDiv.setAttribute("data-start-time", usage.startTime);
+                    dayDiv.setAttribute("data-end-time", usage.endTime);
+                    dayDiv.setAttribute("data-address", usage.address);
 
-                    // 统计当年的使用天数和小时数
-                    if (specificDate >= startOfYear && specificDate <= today) {
-                        if (usage.hours > 0 && usage.hours < 16) {
+                    // 统计逻辑
+                    if (usage.hours > 0) {
+                        if (usage.hours < 16) {
                             yearTotalDays++;
                             yearTotalHours += usage.hours;
                         }
                         if (usage.hours >= 16 && usage.hours < 17) {
                             daysOver16Hours++;
-                            yearTotalDays++; // 大于等于16小时的日期仍计入工作日，但不计入工作时间
+                            yearTotalDays++;
                         }
                         if (usage.hours >= 17) {
                             daysOver17Hours++;
-                            // 不计入工作日和工作时间
                         }
 
-                        // 统计加班天数，条件是下班时间在17:30之后
-                        const endTime = new Date(`1970-01-01T${usage.endTime.split(':').slice(0, 2).join(':')}:00`); // 只取 HH:mm，并设置秒为 00
-                        const overtimeThreshold = new Date(`1970-01-01T17:30:00`); // 17:30 的时间
-                        console.log(`Date: ${dateString}, End Time: ${endTime}, Overtime Threshold: ${overtimeThreshold}`);
+                        const endTime = new Date(`1970-01-01T${usage.endTime.split(':').slice(0, 2).join(':')}:00`);
+                        const overtimeThreshold = new Date(`1970-01-01T17:30:00`);
                         if (endTime > overtimeThreshold) {
                             overtimeDays++;
                         }
                     }
-
-                    // 工具提示功能
-                    dayDiv.addEventListener("mouseenter", function() {
-                        const usage = this.getAttribute("data-usage");
-                        const date = this.getAttribute("data-date");
-                        const startTime = this.getAttribute("data-start-time"); // 获取开机时间
-                        const endTime = this.getAttribute("data-end-time"); // 获取关机时间
-                        const businessTripAddress = this.getAttribute("data-address"); // 获取出差地址
-
-                        // 更新工具提示内容
-                        let tooltipContent = `${date}\n开机时间: ${startTime}\n关机时间: ${endTime}\n总计时间: ${usage} hours`;
-                        
-                        // 如果存在内容且不为空，则添加到工具提示内容中
-                        if (businessTripAddress && businessTripAddress.trim() !== "") {
-                            tooltipContent += `\n备注: ${businessTripAddress}`; // 追加出差地址
-                        }
-
-                        tooltip.innerText = tooltipContent;
-
-                        // 计算工具提示位置
-                        const rect = this.getBoundingClientRect();
-                        tooltip.style.left = `${rect.left + window.scrollX + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`; // 居中
-                        tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`; // 在方格上方，留出5px的间距
-                        tooltip.classList.add("show");
-                    });
-
-                    dayDiv.addEventListener("mouseleave", function() {
-                        tooltip.classList.remove("show");
-                    });
-
-                } else {
-                    dayDiv.classList.add("future");
                 }
 
+                // 工具提示功能
+                dayDiv.addEventListener("mouseenter", function() {
+                    const usage = this.getAttribute("data-usage");
+                    const date = this.getAttribute("data-date");
+                    const startTime = this.getAttribute("data-start-time");
+                    const endTime = this.getAttribute("data-end-time");
+                    const businessTripAddress = this.getAttribute("data-address");
+
+                    let tooltipContent = `${date}\n开机时间: ${startTime}\n关机时间: ${endTime}\n总计时间: ${usage} hours`;
+                    if (businessTripAddress && businessTripAddress.trim() !== "") {
+                        tooltipContent += `\n备注: ${businessTripAddress}`;
+                    }
+
+                    tooltip.innerText = tooltipContent;
+                    const rect = this.getBoundingClientRect();
+                    tooltip.style.left = `${rect.left + window.scrollX + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+                    tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
+                    tooltip.classList.add("show");
+                });
+
+                dayDiv.addEventListener("mouseleave", function() {
+                    tooltip.classList.remove("show");
+                });
+
                 weekDiv.appendChild(dayDiv);
-                currentDate.setDate(currentDate.getDate() + 1); // 生下一天
+                currentDate.setDate(currentDate.getDate() + 1);
             }
 
-            weeksContainer.prepend(weekDiv); // 从右向左插入
-            currentDate.setDate(currentDate.getDate() - 14);  // 回上周日
+            weeksContainer.appendChild(weekDiv);
         }
 
-        // 替换调用updateMonthLabels函数，传入第一个日期方格的日期
-        updateMonthLabels(currentDate);
-
-        // 更新统计结果
-        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours, overtimeDays); // 传入 overtimeDays
+        updateMonthLabels(startDate, isYearSelected ? selectedYear : null);
+        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours, overtimeDays, isYearSelected ? selectedYear : null);
     }
 
-    function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays) {
-        const statsContainer = document.createElement('div');
+    function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays, year) {
+        const statsContainer = document.querySelector('.stats-container') || document.createElement('div');
         statsContainer.classList.add('stats-container');
-        const currentYear = new Date().getFullYear();
         statsContainer.innerHTML = `
-           <span>${days} working days in ${currentYear}<span class="hours-text">(${hours.toFixed(1)} hours)</span></span>
+           <span>${days} working days in ${year}<span class="hours-text">(${hours.toFixed(1)} hours)</span></span>
         `;
         calendar.appendChild(statsContainer);
 
-        // 新增加班统计图例
-        const legendOvertime = document.createElement('div');
-        legendOvertime.classList.add('legend-overtime');
-        legendOvertime.innerHTML = `
-            <div class="legend-square"></div>
-            <span class="overtime-text">Work Overtime <span class="days-over-16-text">(${overtimeDays} days)</span></span>
-        `;
+        // 更新加班统计图例
+        let legendOvertime = document.querySelector('.legend-overtime');
+        if (!legendOvertime) {
+            legendOvertime = document.createElement('div');
+            legendOvertime.classList.add('legend-overtime');
+            legendOvertime.innerHTML = `
+                <div class="legend-square"></div>
+                <span class="overtime-text">Work Overtime <span class="days-over-16-text">(0 days)</span></span>
+            `;
+            // 将加班图例插入到请假图例之前
+            const legendLeave = document.querySelector('.legend-leave');
+            legendLeave.parentNode.insertBefore(legendOvertime, legendLeave);
+        }
+        legendOvertime.querySelector('.days-over-16-text').textContent = `(${overtimeDays} days)`;
 
         // 更新请假图例
         const legendLeave = document.querySelector('.legend-leave');
@@ -186,41 +218,33 @@ document.addEventListener("DOMContentLoaded", function() {
         // 更新出差图例
         const legendBusinessTrip = document.querySelector('.legend-business-trip');
         legendBusinessTrip.querySelector('.days-over-16-text').textContent = `(${daysOver16Hours} days)`;
-
-        // 将加班图例插入到请假图例之前
-        legendLeave.parentNode.insertBefore(legendOvertime, legendLeave);
     }
 
-    // 每24小时更新一次日历
-    setInterval(function() {
-        if (Object.keys(usageData).length > 0) {
-            generateCalendar();
-        }
-    }, 24 * 60 * 60 * 1000);
-
-    function updateMonthLabels(startDate) {
+    function updateMonthLabels(startDate, selectedYear) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        monthsContainer.innerHTML = ''; // 清空现有标签
+        monthsContainer.innerHTML = '';
 
         const updateLabels = () => {
-            monthsContainer.innerHTML = ''; // 清空现有标签
+            monthsContainer.innerHTML = '';
             const containerWidth = weeksContainer.offsetWidth;
-            const squareWidth = containerWidth / 52; // 动态计算方格宽度
-            const labelOffset = 19; // 标签左偏移量
-            const topOffset = 10; // 标签上下偏移量
+            const squareWidth = containerWidth / 53;
+            const labelOffset = 25;
+            const topOffset = 10;
 
             let currentDate = new Date(startDate);
-            currentDate.setDate(currentDate.getDate() - 364); // 从一年前开始
+            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
+
             let lastMonth = -1;
 
             for (let i = 0; i < 53; i++) {
                 const monthIndex = currentDate.getMonth();
-                if (monthIndex !== lastMonth && currentDate.getDay() === 0) {
-                    // 检查是否是本月的第一个或第二个周日
+                if ((!selectedYear || currentDate.getFullYear() === selectedYear) && 
+                    (monthIndex !== lastMonth || i === 0) && 
+                    currentDate.getDay() === 0) {
                     const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
                     const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
                     
-                    if (daysSinceMonthStart < 14) { // 允许月份的前两个周日
+                    if (daysSinceMonthStart < 14 || i === 0) {
                         const monthDiv = document.createElement('div');
                         monthDiv.textContent = months[monthIndex];
                         const leftOffset = i * squareWidth + labelOffset;
@@ -231,16 +255,23 @@ document.addEventListener("DOMContentLoaded", function() {
                         lastMonth = monthIndex;
                     }
                 }
-                currentDate.setDate(currentDate.getDate() + 7);
+                currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
             }
         };
 
         updateLabels();
-
-        // 添加窗口大小变化事件监听器
         window.addEventListener('resize', updateLabels);
     }
 
-    // 每天午夜更新一次
-    setInterval(updateMonthLabels, 24 * 60 * 60 * 1000);
+    // 每24小时更新一次日历
+    setInterval(function() {
+        if (Object.keys(usageData).length > 0) {
+            const selectedYear = document.querySelector('.year.selected');
+            if (selectedYear) {
+                generateCalendar(parseInt(selectedYear.getAttribute('data-year')), true);
+            } else {
+                generateCalendar(null, false);
+            }
+        }
+    }, 24 * 60 * 60 * 1000);
 });
