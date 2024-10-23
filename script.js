@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
                 const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
                 
-                if (daysSinceMonthStart < 20 || i === 0) {
+                if (daysSinceMonthStart < 13 || i === 0) {
                     const monthDiv = document.createElement('div');
                     monthDiv.textContent = months[monthIndex];
                     const leftOffset = i * squareWidth + labelOffset;
