@@ -236,9 +236,9 @@ document.addEventListener("DOMContentLoaded", function() {
         currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
 
         let lastMonth = -1;
-        let firstLabelDate = null; // 用于记录第一个标签的日期
-        let secondLabelDate = null; // 用于记录第二个标签的日期
-        let firstLabelDisplayed = false; // 标记第一个标签是否显示
+        let lastLabelDate = null; // 用于记录最后一个标签的日期
+        let secondLastLabelDate = null; // 用于记录倒数第二个标签的日期
+        let labels = []; // 用于存储生成的标签
 
         for (let i = 0; i < 53; i++) {
             const monthIndex = currentDate.getMonth();
@@ -255,32 +255,33 @@ document.addEventListener("DOMContentLoaded", function() {
                     monthDiv.style.top = `${topOffset}px`;
                     monthDiv.style.position = 'absolute';
 
-                    // 记录第一个标签的日期
-                    if (!firstLabelDisplayed) {
-                        firstLabelDate = currentDate; // 记录第一个标签的日期
-                        monthsContainer.appendChild(monthDiv); // 显示第一个标签
-                        firstLabelDisplayed = true; // 标记第一个标签已显示
-                    } else {
-                        // 记录第二个标签的日期
-                        secondLabelDate = currentDate; // 更新第二个标签的日期
-
-                        // 检查第一个标签与第二个标签的日期差
-                        const daysDiff = Math.floor((secondLabelDate - firstLabelDate) / (24 * 60 * 60 * 1000));
-                        if (daysDiff > 15) {
-                            monthsContainer.appendChild(monthDiv); // 显示第二个标签
-                        } else {
-                            // 如果相差不超过15天，则不显示第一个标签
-                            if (firstLabelDisplayed) {
-                                monthsContainer.removeChild(monthsContainer.firstChild); // 移除第一个标签
-                                firstLabelDisplayed = false; // 更新标记
-                            }
-                        }
+                    // 记录最后一个标签的日期
+                    if (lastLabelDate !== null) {
+                        secondLastLabelDate = lastLabelDate; // 更新倒数第二个标签的日期
                     }
+                    lastLabelDate = currentDate; // 更新最后一个标签的日期
 
+                    // 存储标签以便后续处理
+                    labels.push(monthDiv);
                     lastMonth = monthIndex; // 更新最后一个月份索引
                 }
             }
             currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
+        }
+
+        // 检查最后一个标签和倒数第二个标签的日期差
+        if (secondLastLabelDate !== null) {
+            const daysDiff = Math.floor((lastLabelDate - secondLastLabelDate) / (24 * 60 * 60 * 1000));
+            if (daysDiff > 15) {
+                // 如果相差超过15天，显示所有标签
+                labels.forEach(label => monthsContainer.appendChild(label));
+            } else {
+                // 如果相差不超过15天，则不显示最后一个标签
+                labels.slice(0, -1).forEach(label => monthsContainer.appendChild(label)); // 显示除了最后一个标签以外的所有标签
+            }
+        } else {
+            // 如果没有倒数第二个标签，显示所有标签
+            labels.forEach(label => monthsContainer.appendChild(label));
         }
     };
 
