@@ -235,9 +235,12 @@ document.addEventListener("DOMContentLoaded", function() {
         currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
 
         let lastMonth = -1;
-
+        let lastLabelLeft = -Infinity; // 初始化为负无穷大 
+        
         for (let i = 0; i < 53; i++) {
             const monthIndex = currentDate.getMonth();
+             const leftOffset = i * squareWidth + labelOffset;
+            
             // 生成53周方格的月份标签
              if (monthIndex !== lastMonth || i === 0) {
                 // 检查标签之间的距离
