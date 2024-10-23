@@ -236,9 +236,6 @@ document.addEventListener("DOMContentLoaded", function() {
         currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
 
         let lastMonth = -1;
-        let firstLabelDate = null; // 用于记录第一个标签的日期
-        let secondLabelDate = null; // 用于记录第二个标签的日期
-        let firstLabelDisplayed = false; // 标记第一个标签是否显示
 
         for (let i = 0; i < 53; i++) {
             const monthIndex = currentDate.getMonth();
@@ -254,30 +251,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     monthDiv.style.left = `${leftOffset}px`;
                     monthDiv.style.top = `${topOffset}px`;
                     monthDiv.style.position = 'absolute';
-
-                    // 记录第一个标签的日期
-                    if (!firstLabelDisplayed) {
-                        firstLabelDate = currentDate; // 记录第一个标签的日期
-                        monthsContainer.appendChild(monthDiv); // 显示第一个标签
-                        firstLabelDisplayed = true; // 标记第一个标签已显示
-                    } else {
-                        // 记录第二个标签的日期
-                        secondLabelDate = currentDate; // 更新第二个标签的日期
-
-                        // 检查第一个标签与第二个标签的日期差
-                        const daysDiff = Math.floor((secondLabelDate - firstLabelDate) / (24 * 60 * 60 * 1000));
-                        if (daysDiff > 15) {
-                            monthsContainer.appendChild(monthDiv); // 显示第二个标签
-                        } else {
-                            // 如果相差不超过15天，则不显示第一个标签
-                            if (firstLabelDisplayed) {
-                                monthsContainer.removeChild(monthsContainer.firstChild); // 移除第一个标签
-                                firstLabelDisplayed = false; // 更新标记
-                            }
-                        }
-                    }
-
-                    lastMonth = monthIndex; // 更新最后一个月份索引
+                    monthsContainer.appendChild(monthDiv);
+                    lastMonth = monthIndex;
                 }
             }
             currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
@@ -286,7 +261,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     updateLabels();
     window.addEventListener('resize', updateLabels);
-}
     }
 
     // 每24小时更新一次日历
