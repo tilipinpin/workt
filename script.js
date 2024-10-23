@@ -236,6 +236,7 @@ document.addEventListener("DOMContentLoaded", function() {
         currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
 
         let lastMonth = -1;
+        let lastMonthDate = null; // 用于记录最左边标签的日期
 
         for (let i = 0; i < 53; i++) {
             const monthIndex = currentDate.getMonth();
@@ -253,6 +254,19 @@ document.addEventListener("DOMContentLoaded", function() {
                     monthDiv.style.position = 'absolute';
                     monthsContainer.appendChild(monthDiv);
                     lastMonth = monthIndex;
+
+                    // 记录最左边标签的日期
+                    if (lastMonthDate === null) {
+                        lastMonthDate = currentDate;
+                    } else {
+                        // 检查最左边标签与下一个标签的日期差
+                        const daysDiff = Math.floor((currentDate - lastMonthDate) / (24 * 60 * 60 * 1000));
+                        if (daysDiff <= 14) {
+                            // 如果相差不超过14天，则不显示最左边的标签
+                            monthsContainer.removeChild(monthDiv);
+                        }
+                        lastMonthDate = currentDate; // 更新最左边标签的日期
+                    }
                 }
             }
             currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
