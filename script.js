@@ -184,8 +184,9 @@ document.addEventListener("DOMContentLoaded", function() {
             weeksContainer.appendChild(weekDiv);
         }
 
-        updateMonthLabels(startDate, isYearSelected ? selectedYear : null);
-        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours, overtimeDays, isYearSelected ? selectedYear : null);
+       ```language:your/file/path
+        updateMonthLabels(startDate, isYearSelected ? selectedYear : new Date().getFullYear());
+        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours, overtimeDays, isYearSelected ? selectedYear : new Date().getFullYear());
     }
 
     function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays, year) {
