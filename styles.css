@@ -434,7 +434,7 @@ body {
     flex-direction: column; /* 竖着排列 */
     align-items: flex-start; /* 左对齐 */
     position: relative; /* 改为相对定位 */
-    left: -80px; /* 将年份选择器放置在左侧 */
+    left: -50px; /* 将年份选择器放置在左侧 */
     top: 170px; /* 根据需要调整顶部位置 */
 }
 
