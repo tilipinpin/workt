@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
@@ -235,24 +236,23 @@ document.addEventListener("DOMContentLoaded", function() {
         currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
 
         let lastMonth = -1;
-        let lastLabelLeft = -Infinity; // 初始化为负无穷大 
-        
+
         for (let i = 0; i < 53; i++) {
             const monthIndex = currentDate.getMonth();
-             const leftOffset = i * squareWidth + labelOffset;
-            
             // 生成53周方格的月份标签
-             if (monthIndex !== lastMonth || i === 0) {
-                // 检查标签之间的距离
-                if (i === 0 || (leftOffset - lastLabelLeft) > 50) { // 50 是自定义的最小距离
+            if (monthIndex !== lastMonth || i === 0) {
+                const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
+                const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
+                
+                if (daysSinceMonthStart < 14 || i === 0) {
                     const monthDiv = document.createElement('div');
                     monthDiv.textContent = months[monthIndex];
+                    const leftOffset = i * squareWidth + labelOffset;
                     monthDiv.style.left = `${leftOffset}px`;
                     monthDiv.style.top = `${topOffset}px`;
                     monthDiv.style.position = 'absolute';
                     monthsContainer.appendChild(monthDiv);
                     lastMonth = monthIndex;
-                    lastLabelLeft = leftOffset; // 更新最后一个标签的左偏移量
                 }
             }
             currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
