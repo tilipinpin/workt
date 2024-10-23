@@ -221,47 +221,45 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateMonthLabels(startDate, selectedYear) {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    monthsContainer.innerHTML = '';
+
+    const updateLabels = () => {
         monthsContainer.innerHTML = '';
+        const containerWidth = weeksContainer.offsetWidth;
+        const squareWidth = containerWidth / 53;
+        const labelOffset = 25;
+        const topOffset = 10;
 
-        const updateLabels = () => {
-            monthsContainer.innerHTML = '';
-            const containerWidth = weeksContainer.offsetWidth;
-            const squareWidth = containerWidth / 53;
-            const labelOffset = 25;
-            const topOffset = 10;
+        let currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
 
-            let currentDate = new Date(startDate);
-            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
+        let lastMonth = -1;
 
-            let lastMonth = -1;
-
-            for (let i = 0; i < 53; i++) {
+        for (let i = 0; i < 53; i++) {
             const monthIndex = currentDate.getMonth();
-            // 检查是否选择了年份，如果没有选择年份，则生成所有方格的月份标签
-            if (!selectedYear || (currentDate.getFullYear() === selectedYear && 
-                (monthIndex !== lastMonth || i === 0) && 
-                currentDate.getDay() === 0)) {
+            // 生成53周方格的月份标签
+            if (monthIndex !== lastMonth || i === 0) {
                 const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
                 const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
-                    
-                    if (daysSinceMonthStart < 14 || i === 0) {
-                        const monthDiv = document.createElement('div');
-                        monthDiv.textContent = months[monthIndex];
-                        const leftOffset = i * squareWidth + labelOffset;
-                        monthDiv.style.left = `${leftOffset}px`;
-                        monthDiv.style.top = `${topOffset}px`;
-                        monthDiv.style.position = 'absolute';
-                        monthsContainer.appendChild(monthDiv);
-                        lastMonth = monthIndex;
-                    }
+                
+                if (daysSinceMonthStart < 14 || i === 0) {
+                    const monthDiv = document.createElement('div');
+                    monthDiv.textContent = months[monthIndex];
+                    const leftOffset = i * squareWidth + labelOffset;
+                    monthDiv.style.left = `${leftOffset}px`;
+                    monthDiv.style.top = `${topOffset}px`;
+                    monthDiv.style.position = 'absolute';
+                    monthsContainer.appendChild(monthDiv);
+                    lastMonth = monthIndex;
                 }
-                currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
             }
-        };
+            currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
+        }
+    };
 
-        updateLabels();
-        window.addEventListener('resize', updateLabels);
+    updateLabels();
+    window.addEventListener('resize', updateLabels);
     }
 
     // 每24小时更新一次日历
