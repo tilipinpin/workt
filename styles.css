@@ -5,9 +5,9 @@ body {
     align-items: flex-start;
     height: 100vh;
     margin: 0;
-    padding: 0;
+    padding: 0; /* 将 padding-top 改为 0 */
     background-color: #ffffff;
-    padding-top: -30px; /* 根据需要调整这个值 */
+    /* padding-top: -50px; */ /* 删除或注释掉这一行 */
 }
 
 .calendar {
@@ -186,6 +186,7 @@ body {
 
 .container {
     padding-top: 20px; /* 可以根据需调整顶部间距 */
+    margin-top: -100px; /* 添加负的 margin-top 值 */
 }
 
 .no-data {
@@ -434,7 +435,7 @@ body {
     flex-direction: column; /* 竖着排列 */
     align-items: flex-start; /* 左对齐 */
     position: relative; /* 改为相对定位 */
-    left: -50px; /* 将年份选择器放置在左侧 */
+    left: -80px; /* 将年份选择器放置在左侧 */
     top: 170px; /* 根据需要调整顶部位置 */
 }
 
@@ -446,7 +447,7 @@ body {
     margin: 3px 0; /* 增加上下间距 */
     transition: background-color 0.3s, transform 0.2s; /* 添加过渡效果 */
     font-size: 12px; /* 缩小字体 */
-    position: relative; /* 确保伪元素相对于年份标签定位 */
+    position: relative; /* 确保伪元素相对于年份标签位 */
 }
 
 /* 选中时显示底纹 */
@@ -456,7 +457,7 @@ body {
     bottom: 0; /* 定位到底部 */
     left: 0;
     right: 0;
-    height: 4px; /* 设置底纹高度 */
+    height: 6px; /* 设置底纹高度 */
     background-color: green; /* 选中时底纹为绿色 */
     border-radius: 0 0 3px 3px; /* 圆角 */
 }
@@ -479,6 +480,9 @@ body {
         padding: 2px; /* 减少内边距 */
     }
 }
+
+
+
 
 
 
