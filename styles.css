@@ -7,7 +7,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: #ffffff;
-    padding-top: 10px; /* 根据需要调整这个值 */
+    padding-top: -30px; /* 根据需要调整这个值 */
 }
 
 .calendar {
