@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
@@ -222,45 +221,46 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateMonthLabels(startDate, selectedYear) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    monthsContainer.innerHTML = '';
-
-    const updateLabels = () => {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         monthsContainer.innerHTML = '';
-        const containerWidth = weeksContainer.offsetWidth;
-        const squareWidth = containerWidth / 53;
-        const labelOffset = 25;
-        const topOffset = 10;
 
-        let currentDate = new Date(startDate);
-        currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
+        const updateLabels = () => {
+            monthsContainer.innerHTML = '';
+            const containerWidth = weeksContainer.offsetWidth;
+            const squareWidth = containerWidth / 53;
+            const labelOffset = 25;
+            const topOffset = 10;
 
-        let lastMonth = -1;
+            let currentDate = new Date(startDate);
+            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
 
-        for (let i = 0; i < 53; i++) {
-            const monthIndex = currentDate.getMonth();
-            // 生成53周方格的月份标签
-            if (monthIndex !== lastMonth || i === 0) {
-                const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
-                const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
-                
-                if (daysSinceMonthStart < 7 || i === 0) {
-                    const monthDiv = document.createElement('div');
-                    monthDiv.textContent = months[monthIndex];
-                    const leftOffset = i * squareWidth + labelOffset;
-                    monthDiv.style.left = `${leftOffset}px`;
-                    monthDiv.style.top = `${topOffset}px`;
-                    monthDiv.style.position = 'absolute';
-                    monthsContainer.appendChild(monthDiv);
-                    lastMonth = monthIndex;
+            let lastMonth = -1;
+
+            for (let i = 0; i < 53; i++) {
+                const monthIndex = currentDate.getMonth();
+                // 生成53周方格的月份标签
+                if (monthIndex !== lastMonth) {
+                    const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
+                    const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
+                    
+                    // 确保每个年份都显示12个月份的标签
+                    if (daysSinceMonthStart < 14 || (selectedYear === 2023 && i === 0)) {
+                        const monthDiv = document.createElement('div');
+                        monthDiv.textContent = months[monthIndex];
+                        const leftOffset = i * squareWidth + labelOffset;
+                        monthDiv.style.left = `${leftOffset}px`;
+                        monthDiv.style.top = `${topOffset}px`;
+                        monthDiv.style.position = 'absolute';
+                        monthsContainer.appendChild(monthDiv);
+                        lastMonth = monthIndex; // 更新最后一个月份
+                    }
                 }
+                currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
             }
-            currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
-        }
-    };
+        };
 
-    updateLabels();
-    window.addEventListener('resize', updateLabels);
+        updateLabels();
+        window.addEventListener('resize', updateLabels);
     }
 
     // 每24小时更新一次日历
