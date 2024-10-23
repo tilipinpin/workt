@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function generateYearSelector() {
         const currentYear = new Date().getFullYear();
-        for (let i = 0; i < 4; i++) {
+        for (let i = 1; i < 5; i++) {
             const year = currentYear - i;
             const yearDiv = document.createElement('div');
             yearDiv.classList.add('year');
