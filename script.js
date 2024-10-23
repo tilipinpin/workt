@@ -237,12 +237,13 @@ document.addEventListener("DOMContentLoaded", function() {
             let lastMonth = -1;
 
             for (let i = 0; i < 53; i++) {
-                const monthIndex = currentDate.getMonth();
-                if ((!selectedYear || currentDate.getFullYear() === selectedYear) && 
-                    (monthIndex !== lastMonth || i === 0) && 
-                    currentDate.getDay() === 0) {
-                    const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
-                    const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
+            const monthIndex = currentDate.getMonth();
+            // 检查是否选择了年份，如果没有选择年份，则生成所有方格的月份标签
+            if (!selectedYear || (currentDate.getFullYear() === selectedYear && 
+                (monthIndex !== lastMonth || i === 0) && 
+                currentDate.getDay() === 0)) {
+                const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
+                const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
                     
                     if (daysSinceMonthStart < 14 || i === 0) {
                         const monthDiv = document.createElement('div');
