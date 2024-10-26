@@ -3,35 +3,32 @@ document.addEventListener("DOMContentLoaded", function() {
     const monthsContainer = document.querySelector(".months");
     const weeksContainer = document.querySelector(".weeks");
     const tooltip = document.getElementById("tooltip");
+    const yearSelector = document.getElementById("yearSelector");
 
     let usageData = {};
     let calendarGenerated = false;
 
-    // 添加年份选择器
-    const yearSelector = document.createElement('div');
-    yearSelector.className = 'year-selector';
-    document.querySelector('.container').insertBefore(yearSelector, calendar);
-
+    // 生成年份选择器
     function generateYearSelector() {
         const currentYear = new Date().getFullYear();
-        for (let i = 1; i < 5; i++) {
+        for (let i = 1; i < 10; i++) {
             const year = currentYear - i;
-            const yearDiv = document.createElement('div');
-            yearDiv.classList.add('year');
-            yearDiv.textContent = year;
-            yearDiv.setAttribute('data-year', year);
-            yearSelector.appendChild(yearDiv);
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelector.appendChild(option);
         }
     }
 
     generateYearSelector();
 
     // 年份选择事件
-    yearSelector.addEventListener('click', function(event) {
-        if (event.target.classList.contains('year')) {
-            const selectedYear = parseInt(event.target.getAttribute('data-year'));
-            document.querySelectorAll('.year').forEach(y => y.classList.remove('selected'));
-            event.target.classList.add('selected');
+    yearSelector.addEventListener('change', function() {
+        const selectedValue = this.value;
+        if (selectedValue === 'recent') {
+            generateCalendar(null, false);
+        } else {
+            const selectedYear = parseInt(selectedValue);
             generateCalendar(selectedYear, true);
         }
     });
@@ -60,7 +57,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             });
             if (!calendarGenerated) {
-                generateCalendar(null, false); // 加载时生成当前日期往前53周的方格
+                yearSelector.value = 'recent';
+                generateCalendar(null, false);
                 calendarGenerated = true;
             }
         })
@@ -185,14 +183,17 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         updateMonthLabels(startDate, isYearSelected ? selectedYear : new Date().getFullYear());
-        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours, overtimeDays, isYearSelected ? selectedYear :new Date().getFullYear());
+        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours, overtimeDays, isYearSelected ? selectedYear : null);
     }
 
     function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays, year) {
         const statsContainer = document.querySelector('.stats-container') || document.createElement('div');
         statsContainer.classList.add('stats-container');
+        
+        const displayYear = year || new Date().getFullYear();
+        
         statsContainer.innerHTML = `
-           <span>${days} working days in ${year}<span class="hours-text">(${hours.toFixed(1)} hours)</span></span>
+           <span>${days} working days in ${displayYear}</span><span class="hours-text">(${hours.toFixed(1)} hours)</span>
         `;
         calendar.appendChild(statsContainer);
 
@@ -232,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const topOffset = 10;
 
             let currentDate = new Date(startDate);
-            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
+            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开
 
             let lastMonth = -1;
 
@@ -266,11 +267,12 @@ document.addEventListener("DOMContentLoaded", function() {
     // 每24小时更新一次日历
     setInterval(function() {
         if (Object.keys(usageData).length > 0) {
-            const selectedYear = document.querySelector('.year.selected');
-            if (selectedYear) {
-                generateCalendar(parseInt(selectedYear.getAttribute('data-year')), true);
-            } else {
+            const selectedValue = yearSelector.value;
+            if (selectedValue === 'recent') {
                 generateCalendar(null, false);
+            } else {
+                const selectedYear = parseInt(selectedValue);
+                generateCalendar(selectedYear, true);
             }
         }
     }, 24 * 60 * 60 * 1000);
