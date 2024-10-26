@@ -1,15 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Annual Work Time Statistics</title>
+    <title>年度工作时间统计</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <div class="calendar">
+            <!-- 修改年份选择器 -->
+            <select id="yearSelector" class="year-selector">
+                <option value="recent">近一年</option>
+            </select>
             <div class="months"></div>
             <div class="content">
                 <div class="weekdays">
