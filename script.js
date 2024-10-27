@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function toChinaTime(date) {
         // 将日期转换为中国时区（UTC+8）
-        const utcOffset = 0 * 60; // UTC的分钟数
+        const utcOffset = 8 * 60; // UTC的分钟数
         return new Date(date.getTime() + (utcOffset * 60 * 1000));
     }
 
@@ -264,16 +264,26 @@ document.addEventListener("DOMContentLoaded", function() {
         window.addEventListener('resize', updateLabels);
     }
 
-    // 每24小时更新一次日历
-    setInterval(function() {
-        if (Object.keys(usageData).length > 0) {
-            const selectedValue = yearSelector.value;
-            if (selectedValue === 'recent') {
-                generateCalendar(null, false);
-            } else {
-                const selectedYear = parseInt(selectedValue);
-                generateCalendar(selectedYear, true);
+    function scheduleNextUpdate() {
+        const now = new Date();
+        const chinaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // 转换为中国时间
+        const tomorrow = new Date(chinaTime.getFullYear(), chinaTime.getMonth(), chinaTime.getDate() + 1);
+        const timeUntilMidnight = tomorrow - chinaTime;
+
+        setTimeout(function() {
+            if (Object.keys(usageData).length > 0) {
+                const selectedValue = yearSelector.value;
+                if (selectedValue === 'recent') {
+                    generateCalendar(null, false);
+                } else {
+                    const selectedYear = parseInt(selectedValue);
+                    generateCalendar(selectedYear, true);
+                }
             }
-        }
-    }, 24 * 60 * 60 * 1000);
+            scheduleNextUpdate(); // 安排下一次更新
+        }, timeUntilMidnight);
+    }
+
+    // 初始调用以开始定时更新
+    scheduleNextUpdate();
 });
