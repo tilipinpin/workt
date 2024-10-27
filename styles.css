@@ -1,705 +1,298 @@
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    background-color: #ffffff;
-}
+document.addEventListener("DOMContentLoaded", function() {
+    const calendar = document.querySelector(".calendar");
+    const monthsContainer = document.querySelector(".months");
+    const weeksContainer = document.querySelector(".weeks");
+    const tooltip = document.getElementById("tooltip");
+    const yearSelector = document.getElementById("yearSelector");
 
-.container {
-    padding-top: 20px; /* 可以根据需要调整顶部间距 */
-    margin-top: 10px; /* 添加顶部外边距来下移整个内容 */
-}
+    let usageData = {};
+    let calendarGenerated = false;
 
-.calendar {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 1200px;
-    padding-top: 40px;
-}
-
-.months {
-    position: relative;
-    height: 20px;
-    margin-bottom: 5px;
-}
-
-.months div {
-    position: absolute;
-    font-size: 12px;
-    font-weight: normal;
-    color: #050505;
-    white-space: nowrap; /* 防止文本换行 */
-}
-
-.content {
-    display: flex;
-    flex-wrap: nowrap; /* 不换行 */
-    overflow-x: auto; /* 允许水平滚动 */
-}
-
-.weekdays {
-    display: flex;
-    flex-direction: column; /* 默认情况下为列方向 */
-    justify-content: space-between;
-    padding-top: 0px; /* 为月份标签留出空间 */
-    margin-right: 5px;
-}
-
-.weekdays div {
-    height: 13px;
-    font-size: 12px;
-    color: #050505;
-    margin-top: -1.5px; /* 增加这一 */
-    margin-bottom: 1px; /* 增加这一行 */
-}
-
-.weeks {
-    display: flex;
-    flex-grow: 1;
-    flex-wrap: nowrap; /* 换行 */
-}
-
-.week {
-    display: flex;
-    flex-direction: column;
-}
-
-.day {
-    width: 10px;
-    height: 10px;
-    margin: 1.5px;
-    background-color: #ebeaf0;
-    border-radius: 1.5px;
-    position: relative;
-}
-
-.day[data-level="1"] {
-    background-color: #c6e48b;
-}
-
-.day[data-level="2"] {
-    background-color: #74c967;
-}
-
-.day[data-level="3"] {
-    background-color: #309f46;
-}
-
-.day[data-level="4"] {
-    background-color: #1b662a;
-}
-.day[data-level="5"] {
-    background-color: #a5b029;  
-    text-align: left; /* 添加这一行 */
-}
-
-.day.future {
-    visibility: hidden;
-}
-
-.tooltip {
-    position: absolute;
-    background-color: #333;
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
-    opacity: 0;
-    pointer-events: none;
-    font-size: 12px;
-    transition: opacity 0.3s;
-    z-index: 1000; /* 确保工具提示在最上层 */
-}
-
-.tooltip.show {
-    opacity: 1;
-}
-
-.legend {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* 确保图例两端对齐 */
-    margin-top: 10px;
-    font-size: 12px; /* 默认字体大小 */
-    color: #242323; /* 保持原有颜色 */
-    white-space: nowrap; /* 防止文本换行 */
-    overflow-x: auto; /* 允许水平滚动 */
-    padding-left: 30px; /* 添加左边距以与上方第一列方格对齐 */
-}
-
-.legend-business-trip,
-.legend-leave,
-.legend-overtime {
-    display: flex;
-    align-items: center;
-    margin-right: 5px; /* 减少右侧间距以适应小屏幕 */
-    flex-shrink: 0; /* 防止缩小 */
-}
-
-.legend-business-trip .legend-square,
-.legend-leave .legend-square,
-.legend-overtime .legend-square {
-    margin-right: 3px; /* 色块与文本之间的间距 */
-}
-
-.legend-main {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0; /* 防止缩小 */
-}
-
-.legend-main span {
-    font-size: 12px; /* 确保 "MORE" 和 "LESS" 的字体大小一致 */
-}
-
-.legend-squares {
-    display: flex;
-    margin: 0 3px;
-    flex-shrink: 0; /* 防止缩小 */
-}
-
-.legend-square {
-    width: 10px;
-    height: 10px;
-    margin: 0 1px;
-    border-radius: 1.5px;
-}
-
-.legend-square[data-level="0"] { background-color: #ebeaf0; }
-.legend-square[data-level="1"] { background-color: #c6e48b; }
-.legend-square[data-level="2"] { background-color: #74c967; }
-.legend-square[data-level="3"] { background-color: #309f46; }
-.legend-square[data-level="4"] { background-color: #1b662a; }
-.legend-square[data-level="5"] { background-color: #a5b029; }  
-
-.stats-container {
-    font-size: 12px;
-    color: #309f46 !important;
-    position: absolute;
-    top: 10px;
-    left: 120px;
-    right: 0;
-    padding: 4px 8px;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    z-index: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.stats-container span,
-.stats-container .hours-text {
-    color: inherit !important;
-}
-
-.hours-text {
-    color: inherit; /* 使用继承的颜色，保持与其他文字一致 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .year-selector {
-        font-size: 10px;
-        padding: 3px 18px 3px 6px;
-        background-size: 14px;
+    // 生成年份选择器
+    function generateYearSelector() {
+        const currentYear = new Date().getFullYear();
+        for (let i = 1; i < 10; i++) {
+            const year = currentYear - i;
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelector.appendChild(option);
+        }
     }
 
-    .stats-container {
-        font-size: 12px;
-        padding: 3px 5px;
-        top: 10px;
-        left: 120px;
-        right: 0;
+    generateYearSelector();
+
+    // 年份选择事件
+    yearSelector.addEventListener('change', function() {
+        const selectedValue = this.value;
+        if (selectedValue === 'recent') {
+            generateCalendar(null, false);
+        } else {
+            const selectedYear = parseInt(selectedValue);
+            generateCalendar(selectedYear, true);
+        }
+    });
+
+    // 数据加载逻辑
+    function loadUsageData() {
+        return fetch('https://raw.githubusercontent.com/tilipinpin/workt/main/date/usage_data.csv')
+            .then(response => response.text())
+            .then(data => {
+                const rows = data.split('\n');
+                rows.forEach(row => {
+                    const [date, startTime, endTime, hours, businessTripAddress] = row.split(',');
+                    const parsedHours = parseFloat(hours);
+                    if (!isNaN(parsedHours)) {
+                        const year = date.split('-')[0];
+                        if (!usageData[year]) {
+                            usageData[year] = {};
+                        }
+                        usageData[year][date] = {
+                            startTime: startTime,
+                            endTime: endTime,
+                            hours: parsedHours,
+                            address: businessTripAddress
+                        };
+                    } else {
+                        console.warn(`无效的使用时间: ${hours}，日期: ${date}`);
+                    }
+                });
+                if (!calendarGenerated) {
+                    yearSelector.value = 'recent';
+                    generateCalendar(null, false);
+                    calendarGenerated = true;
+                }
+            })
+            .catch(error => console.error('Error:', error));
     }
 
-    .hours-text {
-        font-size: 1em;
-    }
-}
-
-.no-data {
-    background-color: #f0f0f0;
-    opacity: 0.5;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .months {
-        margin-bottom: 10px; /* 增加月标签和日期方格之间的距 */
+    function toChinaTime(date) {
+        // 将日期转换为中国时区（UTC+8）
+        return new Date(date.getTime() + (8 * 60 * 60 * 1000)); // 直接使用UTC+8的小时数
     }
 
-    .months div {
-        font-size: 10px; /* 调整小屏幕上的字体大小 */
+    function generateCalendar(selectedYear, isYearSelected) {
+        weeksContainer.innerHTML = '';
+        monthsContainer.innerHTML = '';
+        let yearTotalDays = 0;
+        let yearTotalHours = 0;
+        let daysOver16Hours = 0;
+        let daysOver17Hours = 0;
+        let overtimeDays = 0;
+
+        let startDate, endDate;
+        const today = toChinaTime(new Date());
+        if (isYearSelected && selectedYear) {
+            startDate = toChinaTime(new Date(selectedYear, 0, 1));
+            endDate = toChinaTime(new Date(selectedYear, 11, 31));
+        } else {
+            endDate = today;
+            startDate = new Date(endDate);
+            startDate.setDate(startDate.getDate() - 364); // 从今天往前364天
+        }
+
+        // 确保从当前日期的周日开始生成方格
+        let currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从当前日期的周日开始
+
+        while (currentDate <= endDate) {
+            const weekDiv = document.createElement("div");
+            weekDiv.classList.add("week");
+
+            for (let j = 0; j < 7; j++) {
+                const dayDiv = document.createElement("div");
+                dayDiv.classList.add("day");
+
+                const dateString = currentDate.toISOString().split('T')[0];
+                const year = currentDate.getFullYear();
+                const usage = usageData[year] && usageData[year][dateString] ? usageData[year][dateString] : { hours: 0, startTime: '', endTime: '', address: '' };
+
+                // 只生成属于选定年份的日期方格
+                if (isYearSelected && year !== selectedYear) {
+                    dayDiv.classList.add("future"); // 不属于选中年份的方格
+                } else if (currentDate > today) {
+                    // 不生成今天之后的方格
+                    dayDiv.classList.add("future"); // 可以选择添加样式以标识
+                } else {
+                    // 设置颜色等级和属性
+                    let level = 0;
+                    if (usage.hours > 0) level = 1;
+                    if (usage.hours > 4) level = 2;
+                    if (usage.hours > 8.7) level = 3;
+                    if (usage.hours > 10.7) level = 4;
+                    if (usage.hours >= 16 && usage.hours < 17) level = 5;
+                    if (usage.hours >= 17) level = 6;
+
+                    dayDiv.setAttribute("data-level", level);
+                    dayDiv.setAttribute("data-date", dateString);
+                    dayDiv.setAttribute("data-usage", usage.hours);
+                    dayDiv.setAttribute("data-start-time", usage.startTime);
+                    dayDiv.setAttribute("data-end-time", usage.endTime);
+                    dayDiv.setAttribute("data-address", usage.address);
+
+                    // 统计逻辑
+                    if (usage.hours > 0) {
+                        if (usage.hours < 16) {
+                            yearTotalDays++;
+                            yearTotalHours += usage.hours;
+                        }
+                        if (usage.hours >= 16 && usage.hours < 17) {
+                            daysOver16Hours++;
+                            yearTotalDays++;
+                        }
+                        if (usage.hours >= 17) {
+                            daysOver17Hours++;
+                        }
+
+                        const endTime = new Date(`1970-01-01T${usage.endTime.split(':').slice(0, 2).join(':')}:00`);
+                        const overtimeThreshold = new Date(`1970-01-01T17:30:00`);
+                        if (endTime > overtimeThreshold) {
+                            overtimeDays++;
+                        }
+                    }
+                }
+
+                // 工具提示功能
+                dayDiv.addEventListener("mouseenter", function() {
+                    const usage = this.getAttribute("data-usage");
+                    const date = this.getAttribute("data-date");
+                    const startTime = this.getAttribute("data-start-time");
+                    const endTime = this.getAttribute("data-end-time");
+                    const businessTripAddress = this.getAttribute("data-address");
+
+                    let tooltipContent = `${date}\n开机时间: ${startTime}\n关机时间: ${endTime}\n总计时间: ${usage} hours`;
+                    if (businessTripAddress && businessTripAddress.trim() !== "") {
+                        tooltipContent += `\n备注: ${businessTripAddress}`;
+                    }
+
+                    tooltip.innerText = tooltipContent;
+                    const rect = this.getBoundingClientRect();
+                    tooltip.style.left = `${rect.left + window.scrollX + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+                    tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
+                    tooltip.classList.add("show");
+                });
+
+                dayDiv.addEventListener("mouseleave", function() {
+                    tooltip.classList.remove("show");
+                });
+
+                weekDiv.appendChild(dayDiv);
+                currentDate.setDate(currentDate.getDate() + 1); // 生成下一天
+            }
+
+            weeksContainer.appendChild(weekDiv);
+        }
+
+        updateMonthLabels(startDate, isYearSelected ? selectedYear : new Date().getFullYear());
+        updateStats(yearTotalDays, yearTotalHours, daysOver16Hours, daysOver17Hours, overtimeDays, isYearSelected ? selectedYear : null);
     }
 
-    .day {
-        width: 8px;
-        height: 8px;
+    function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays, year) {
+        const statsContainer = document.querySelector('.stats-container') || document.createElement('div');
+        statsContainer.classList.add('stats-container');
+        
+        const displayYear = year || new Date().getFullYear();
+        
+        statsContainer.innerHTML = `
+           <span>${days} working days in ${displayYear}</span><span class="hours-text">(${hours.toFixed(1)} hours)</span>
+        `;
+        calendar.appendChild(statsContainer);
+
+        // 更新加班统计图例
+        let legendOvertime = document.querySelector('.legend-overtime');
+        if (!legendOvertime) {
+            legendOvertime = document.createElement('div');
+            legendOvertime.classList.add('legend-overtime');
+            legendOvertime.innerHTML = `
+                <div class="legend-square"></div>
+                <span class="overtime-text">Work Overtime <span class="days-over-16-text">(0 days)</span></span>
+            `;
+            // 将加班图例插入到请假图例之前
+            const legendLeave = document.querySelector('.legend-leave');
+            legendLeave.parentNode.insertBefore(legendOvertime, legendLeave);
+        }
+        legendOvertime.querySelector('.days-over-16-text').textContent = `(${overtimeDays} days)`;
+
+        // 更新��假图例
+        const legendLeave = document.querySelector('.legend-leave');
+        legendLeave.querySelector('.days-over-17-text').textContent = `(${daysOver17Hours} days)`;
+
+        // 更新出差图例
+        const legendBusinessTrip = document.querySelector('.legend-business-trip');
+        legendBusinessTrip.querySelector('.days-over-16-text').textContent = `(${daysOver16Hours} days)`;
     }
 
-    .legend-square {
-        width: 8px;
-        height: 8px;
+    function updateMonthLabels(startDate, selectedYear) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        monthsContainer.innerHTML = '';
+
+        const updateLabels = () => {
+            monthsContainer.innerHTML = '';
+            const containerWidth = weeksContainer.offsetWidth;
+            const squareWidth = containerWidth / 53;
+            const labelOffset = 25;
+            const topOffset = 10;
+
+            let currentDate = new Date(startDate);
+            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
+
+            let lastMonth = -1;
+
+            for (let i = 0; i < 53; i++) {
+                const monthIndex = currentDate.getMonth();
+                // 生成53周方格的月份标签
+                if (monthIndex !== lastMonth) {
+                    const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
+                    const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
+                    
+                    // 确保每个年份都显示12个月份的标签
+                    if (daysSinceMonthStart < 14 || (selectedYear === 2023 && i === 0)) {
+                        const monthDiv = document.createElement('div');
+                        monthDiv.textContent = months[monthIndex];
+                        const leftOffset = i * squareWidth + labelOffset;
+                        monthDiv.style.left = `${leftOffset}px`;
+                        monthDiv.style.top = `${topOffset}px`;
+                        monthDiv.style.position = 'absolute';
+                        monthsContainer.appendChild(monthDiv);
+                        lastMonth = monthIndex; // 更新最后一个月份
+                    }
+                }
+                currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
+            }
+        };
+
+        updateLabels();
+        window.addEventListener('resize', updateLabels);
     }
 
-    .legend {
-        flex-direction: row; /* 改回行方向 */
-        flex-wrap: wrap; /* 允许换行 */
-        justify-content: flex-start; /* 左对齐 */
-        overflow-x: auto; /* 允许水平滚动 */
-        white-space: nowrap; /* 防止文本换行 */
-        padding-left: 50px; /* 在小屏幕上减少左边距 */
+    function scheduleNextUpdate() {
+        const now = new Date();
+        const chinaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // 转换为中国时间
+        const tomorrow = new Date(chinaTime.getFullYear(), chinaTime.getMonth(), chinaTime.getDate() + 1);
+        const timeUntilMidnight = tomorrow - chinaTime;
+
+        setTimeout(function() {
+            console.log("执行午夜更新"); // 添加日志
+            loadUsageData().then(() => {
+                const selectedValue = yearSelector.value;
+                if (selectedValue === 'recent') {
+                    generateCalendar(null, false);
+                } else {
+                    const selectedYear = parseInt(selectedValue);
+                    generateCalendar(selectedYear, true);
+                }
+                scheduleNextUpdate(); // 安排下一次更新
+            });
+        }, timeUntilMidnight);
     }
 
-    .legend-business-trip {
-        margin-bottom: 0; /* 移除底部边距 */
-        margin-right: 10px; /* 恢复右侧边距 */
-    }
-
-    .legend-main {
-        width: auto; /* 移除宽度限制 */
-    }
-}
-
-.days-over-16-text,
-.days-over-17-text,
-.business-trip-text,
-.overtime-text {
-    font-size: 12px; /* 确保加班、请假、出差的字体大小一致 */
-}
-
-.hours-text {
-    font-size: 1em;
-    color: #309f46; /* 保持原有颜色 */
-}
-
-
-.days-over-17-text {
-    font-size: 1em; /* 保持原有大小 */
-    color: #f30606; /* 保持原有颜色 */
-}
-
-.business-trip-text {
-    margin-right: 5px; /* 保持之前的右侧间距 */
-    color: #a5b029; 
-}
-
-.overtime-text {
-    color: #000000; /* 将颜色改为黑色 */
-}
-
-.days-over-16-text {
-    color: #050505; /* 保持原有颜色 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .overtime-text,
-    .days-over-16-text {
-        font-size: 10px; /* 在小屏幕上减小字体大小 */
-    }
-}
-
-.day[data-level="6"] {
-    background-color: #f30606;  /* 红色 */
-}
-
-.legend-leave {
-    display: flex;
-    align-items: center;
-    margin-right: 40px; /* 增加右侧间距 */
-    flex-shrink: 0;
-}
-
-.legend-leave .legend-square {
-    width: 10px;
-    height: 10px;
-    margin-right: 5px;
-    border-radius: 1.5px;
-    background-color: #f30606;
-}
-
-@media (max-width: 768px) {
-    .legend-leave {
-        margin-bottom: 0;
-    }
-    
-    .legend-leave .legend-square {
-        width: 8px;
-        height: 8px;
-    }
-    
-    .days-over-17-text {
-        font-size: 1em; /* 在小屏幕上减小字体大小 */
-    }
-}
-
-.legend-container {
-    display: flex;
-    align-items: center; /* 垂直居对齐 */
-    margin-top: 10px; /* 与日历内容之间的间距 */
-}
-
-.legend-square {
-    width: 10px;
-    height: 10px;
-    margin-right: 2.5px;
-    border-radius: 1.5px;
-}
-
-.legend-overtime {
-    display: flex;
-    align-items: center;
-    margin-right: 40px; /* 为加班图例添加右侧间距 */
-    flex-shrink: 0; /* 防止缩小 */
-}
-
-.legend-overtime .legend-square {
-    width: 10px;
-    height: 10px;
-    margin-right: 5px;
-    border-radius: 1.5px;
-    background-color: #1b662a; /* 加班图例颜色 */
-}
-
-.legend-leave {
-    display: flex;
-    align-items: center;
-    margin-right: 40px; /* 加右侧间距 */
-    flex-shrink: 0;
-}
-
-.legend-leave .legend-square {
-    width: 10px;
-    height: 10px;
-    margin-right: 5px;
-    border-radius: 1.5px;
-    background-color: #f30606; /* 请假图例的颜色 */
-}
-
-.legend-business-trip {
-    display: flex;
-    align-items: center;
-    margin-right: 20px; /* 保持之前的右侧间距 */
-    flex-shrink: 0; /* 防止缩小 */
-}
-
-.legend-business-trip .legend-square {
-    margin-right: 5px;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .legend {
-        font-size: 10px; /* 缩小体大小适应小屏幕 */
-        justify-content: space-between; /* 确保图例两端对齐 */
-        padding-left: 25px; /* 保持左距 */
-    }
-
-    .legend-business-trip,
-    .legend-leave,
-    .legend-overtime {
-        margin-right: 3px; /* 一步减少右侧间距 */
-    }
-
-    .legend-main {
-        margin-right: 3px; /* 确保 "MORE" 和 "LESS" 之间的间距适当 */
-    }
-
-    .legend-main .legend-square {
-        margin-right: 1px; /* 减小色块与色之间的间距 */
-    }
-
-    .legend-main span {
-        font-size: 10px; /* 确保 "MORE" 和 "LESS" 的字体大小一致 */
-    }
-
-    .days-over-16-text,
-    .days-over-17-text,
-    .business-trip-text,
-    .overtime-text {
-        font-size: 10px; /* 确保加班、请假、出差的字体大小一致 */
-    }
-
-    .legend-square {
-        width: 8px; /* 缩小图例方块的宽度 */
-        height: 8px; /* 缩小图例方块的高度 */
-    }
-
-    .legend-leave .legend-square,
-    .legend-overtime .legend-square {
-        width: 8px; /* 确保请假和加班图例的方块也缩小 */
-        height: 8px; /* 确保请假和加班图例的方块也缩小 */
-    }
-}
-
-.weekdays {
-    display: flex;
-    flex-direction: column; /* 默认情况下为列方向 */
-    justify-content: space-between;
-    padding-top: 0px; /* 为月份标签留出空间 */
-    margin-right: 5px;
-}
-
-.weekdays div {
-    height: 13px;
-    font-size: 12px;
-    color: #050505;
-    margin-top: -1.5px; /* 增加这一 */
-    margin-bottom: 1px; /* 增加这一行 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .weekdays {
-        flex-direction: column; /* 在小屏幕上改为列方向 */
-        justify-content: flex-start; /* 确保星期标签从顶部开始排列 */
-        margin-right: 1; /* 移除右侧间距 */
-        padding-top: 5px; /* 为星期标签添加顶部间距 */
-    }
-
-    .weekdays div {
-        height: auto; /* 允许高度自适应 */
-        font-size: 10px; /* 调整小屏幕上的字体大小 */
-        margin-top: 2px; /* 增顶部间距 */
-        margin-bottom: 3px; /* 增加底部间距 */
-        text-align: center; /* 使文本居中对齐 */
-    }
-}
-
-.year-selector {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 4px 20px 4px 8px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-    color: #333;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    outline: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 5px top 50%;
-    background-size: 16px;
-    z-index: 2;
-}
-
-.year-selector:hover {
-    background-color: #f0f0f0;
-    border-color: #999;
-}
-
-.year-selector:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 1px rgba(76,175,80,0.2);
-}
-
-.year-selector option {
-    padding: 6px;
-    background-color: #fff;
-    color: #333;
-}
-
-.year-selector option[value="recent"] {
-    font-size: 11px;
-    font-weight: bold;
-    color: #4CAF50;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .year-selector {
-        font-size: 10px;
-        padding: 3px 18px 3px 6px;
-        background-size: 14px;
-    }
-
-    .year-selector option[value="recent"] {
-        font-size: 9px;
-    }
-}
-
-/* 选中时显示底纹 */
-.year.selected::after {
-    content: ''; /* 创建伪元素 */
-    position: absolute; /* 使用绝对定位 */
-    bottom: 0; /* 定位底部 */
-    left: 0;
-    right: 0;
-    height: 6px; /* 设置底纹高度 */
-    background-color: green; /* 选中时底纹为绿色 */
-    border-radius: 0 0 3px 3px; /* 圆 */
-}
-
-/* 悬停时不显示底纹 */
-.year:hover::after {
-    content: none; /* 不显示底纹 */
-}
-
-/* 悬时的背景色和放大效果 */
-.year:hover {
-    background-color: #f0f0f0; /* 悬时的背景色 */
-    transform: scale(1.05); /* 悬停时放大效果 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .year {
-        font-size: 10px; /* 在小屏幕上缩小字体 */
-        padding: 2px; /* 减少内边距 */
-    }
-}
-
-/* 添加这个新的样式规则 */
-.year-selector option[value="recent"] {
-    font-size: 2px; /* 你可以根据需要调整这个值 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .year-selector {
-        font-size: 12px; /* 在小屏幕上减小整体字体大小 */
-    }
-
-    .year-selector option[value="recent"] {
-        font-size: 12px; /* 在小屏幕上进一步减小"近一年"的字体大小 */
-    }
-}
-
-/* Work Overtime 文字颜色 */
-.overtime-text {
-    color: #000000; /* 黑色 */
-}
-
-/* Work Overtime 统计结果颜色 */
-.days-over-16-text {
-    color: #1b662a; /* 深绿色 */
-}
-
-/* Business trip 文字颜色 */
-.business-trip-text {
-    color: #050505; /* 深灰色 */
-}
-
-/* Business trip 统计结果颜色 */
-.business-trip-text .days-over-16-text {
-    color: #a5b029; /* 橄榄绿 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .overtime-text,
-    .days-over-16-text,
-    .business-trip-text,
-    .business-trip-text .days-over-16-text {
-        font-size: 10px; /* 在小屏幕上减小字体大小 */
-    }
-}
-
-.calendar {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 1200px;
-    padding-top: 40px;
-}
-
-.year-selector,
-.stats-container {
-    position: absolute;
-    top: 10px;
-    padding: 4px 8px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-    color: #333;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-}
-
-.year-selector {
-    left: 30px;
-    padding-right: 20px;
-    cursor: pointer;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 5px top 50%;
-    background-size: 16px;
-    z-index: 2;
-}
-
-.stats-container {
-    left: 120px; /* 调整这个值以确保不会与年份选择器重叠 */
-    z-index: 1;
-}
-
-.year-selector:hover,
-.stats-container:hover {
-    background-color: #f0f0f0;
-    border-color: #999;
-}
-
-.year-selector:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76,175,80,0.2);
-}
-
-.stats-container span {
-    display: inline-block;
-    margin-right: 5px;
-}
-
-.hours-text {
-    color: inherit; /* 使用继承的颜色，保持与其他文字一致 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .calendar {
-        padding-top: 40px;
-    }
-
-    .stats-container {
-        font-size: 12px;
-        padding: 3px 5px;
-        top: 10px;
-        left: 120px;
-        right: 0;
-    }
-
-    .hours-text {
-        font-size: 1em;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // 初始加载数据并开始定时更新
+    loadUsageData().then(() => {
+        if (!calendarGenerated) {
+            yearSelector.value = 'recent';
+            generateCalendar(null, false);
+            calendarGenerated = true;
+        }
+        scheduleNextUpdate();
+    });
+});
