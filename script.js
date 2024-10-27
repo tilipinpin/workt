@@ -266,7 +266,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function scheduleNextUpdate() {
         const now = new Date();
-        const chinaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // 转换为中国时间
+        const chinaTime = new Date(now.getTime() + (0 * 60 * 60 * 1000)); // 转换为中国时间
         const tomorrow = new Date(chinaTime.getFullYear(), chinaTime.getMonth(), chinaTime.getDate() + 1);
         const timeUntilMidnight = tomorrow - chinaTime;
 
