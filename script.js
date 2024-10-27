@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function toChinaTime(date) {
         // 将日期转换为中国时区（UTC+8）
-        const utcOffset = 8 * 60; // UTC的分钟数
+        const utcOffset = 0 * 60; // UTC的分钟数
         return new Date(date.getTime() + (utcOffset * 60 * 1000));
     }
 
