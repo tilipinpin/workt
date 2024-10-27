@@ -66,8 +66,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function toChinaTime(date) {
         // 将日期转换为中国时区（UTC+8）
-        const utcOffset = 0 * 60; // UTC的分钟数
-        return new Date(date.getTime() + (utcOffset * 60 * 1000));
+        return new Date(date.getTime() + (8 * 60 * 60 * 1000)); // 直接使用UTC+8的小时数
     }
 
     function generateCalendar(selectedYear, isYearSelected) {
@@ -80,13 +79,14 @@ document.addEventListener("DOMContentLoaded", function() {
         let overtimeDays = 0;
 
         let startDate, endDate;
-        const today = toChinaTime(new Date()); // 获取今天的日期
+        const today = new Date();
+        today.setHours(today.getHours() + 8); // 将时间调整为中国时区
         if (isYearSelected && selectedYear) {
             startDate = toChinaTime(new Date(selectedYear, 0, 1));
             endDate = toChinaTime(new Date(selectedYear, 11, 31));
         } else {
-            startDate = new Date(today);
-            startDate.setDate(startDate.getDate() - 364); // 从今天往前53周
+            startDate = toChinaTime(today);
+            startDate.setDate(startDate.getDate() - 364); // 从今天往前364天
             endDate = today; // 结束日期为今天
         }
 
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
 
                 weekDiv.appendChild(dayDiv);
-                currentDate.setDate(currentDate.getDate() + 1);
+                currentDate.setDate(currentDate.getDate() + 1); // 生下一天
             }
 
             weeksContainer.appendChild(weekDiv);
@@ -266,7 +266,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function scheduleNextUpdate() {
         const now = new Date();
-        const chinaTime = new Date(now.getTime() + (0 * 60 * 60 * 1000)); // 转换为中国时间
+        const chinaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // 转换为中国时间
         const tomorrow = new Date(chinaTime.getFullYear(), chinaTime.getMonth(), chinaTime.getDate() + 1);
         const timeUntilMidnight = tomorrow - chinaTime;
 
