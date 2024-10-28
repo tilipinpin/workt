@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
@@ -34,37 +35,35 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // 数据加载逻辑
-    function loadUsageData() {
-        return fetch('https://raw.githubusercontent.com/tilipinpin/workt/main/date/usage_data.csv')
-            .then(response => response.text())
-            .then(data => {
-                const rows = data.split('\n');
-                rows.forEach(row => {
-                    const [date, startTime, endTime, hours, businessTripAddress] = row.split(',');
-                    const parsedHours = parseFloat(hours);
-                    if (!isNaN(parsedHours)) {
-                        const year = date.split('-')[0];
-                        if (!usageData[year]) {
-                            usageData[year] = {};
-                        }
-                        usageData[year][date] = {
-                            startTime: startTime,
-                            endTime: endTime,
-                            hours: parsedHours,
-                            address: businessTripAddress
-                        };
-                    } else {
-                        console.warn(`无效的使用时间: ${hours}，日期: ${date}`);
+    fetch('https://raw.githubusercontent.com/tilipinpin/workt/main/date/usage_data.csv')
+        .then(response => response.text())
+        .then(data => {
+            const rows = data.split('\n');
+            rows.forEach(row => {
+                const [date, startTime, endTime, hours, businessTripAddress] = row.split(',');
+                const parsedHours = parseFloat(hours);
+                if (!isNaN(parsedHours)) {
+                    const year = date.split('-')[0];
+                    if (!usageData[year]) {
+                        usageData[year] = {};
                     }
-                });
-                if (!calendarGenerated) {
-                    yearSelector.value = 'recent';
-                    generateCalendar(null, false);
-                    calendarGenerated = true;
+                    usageData[year][date] = {
+                        startTime: startTime,
+                        endTime: endTime,
+                        hours: parsedHours,
+                        address: businessTripAddress
+                    };
+                } else {
+                    console.warn(`无效的使用时间: ${hours}，日期: ${date}`);
                 }
-            })
-            .catch(error => console.error('Error:', error));
-    }
+            });
+            if (!calendarGenerated) {
+                yearSelector.value = 'recent';
+                generateCalendar(null, false);
+                calendarGenerated = true;
+            }
+        })
+        .catch(error => console.error('Error:', error));
 
     function toChinaTime(date) {
         // 将日期转换为中国时区（UTC+8）
@@ -81,14 +80,15 @@ document.addEventListener("DOMContentLoaded", function() {
         let overtimeDays = 0;
 
         let startDate, endDate;
-        const today = toChinaTime(new Date());
+        const today = new Date();
+        today.setHours(today.getHours() + 8); // 将时间调整为中国时区
         if (isYearSelected && selectedYear) {
             startDate = toChinaTime(new Date(selectedYear, 0, 1));
             endDate = toChinaTime(new Date(selectedYear, 11, 31));
         } else {
-            endDate = today;
-            startDate = new Date(endDate);
+            startDate = toChinaTime(today);
             startDate.setDate(startDate.getDate() - 364); // 从今天往前364天
+            endDate = today; // 结束日期为今天
         }
 
         // 确保从当前日期的周日开始生成方格
@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
 
                 weekDiv.appendChild(dayDiv);
-                currentDate.setDate(currentDate.getDate() + 1); // 生成下一天
+                currentDate.setDate(currentDate.getDate() + 1); // 生下一天
             }
 
             weeksContainer.appendChild(weekDiv);
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         legendOvertime.querySelector('.days-over-16-text').textContent = `(${overtimeDays} days)`;
 
-        // 更新��假图例
+        // 更新请假图例
         const legendLeave = document.querySelector('.legend-leave');
         legendLeave.querySelector('.days-over-17-text').textContent = `(${daysOver17Hours} days)`;
 
@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const topOffset = 10;
 
             let currentDate = new Date(startDate);
-            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
+            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开
 
             let lastMonth = -1;
 
@@ -272,8 +272,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const timeUntilMidnight = tomorrow - chinaTime;
 
         setTimeout(function() {
-            console.log("执行午夜更新"); // 添加日志
-            loadUsageData().then(() => {
+            if (Object.keys(usageData).length > 0) {
                 const selectedValue = yearSelector.value;
                 if (selectedValue === 'recent') {
                     generateCalendar(null, false);
@@ -281,18 +280,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     const selectedYear = parseInt(selectedValue);
                     generateCalendar(selectedYear, true);
                 }
-                scheduleNextUpdate(); // 安排下一次更新
-            });
+            }
+            scheduleNextUpdate(); // 安排下一次更新
         }, timeUntilMidnight);
     }
 
-    // 初始加载数据并开始定时更新
-    loadUsageData().then(() => {
-        if (!calendarGenerated) {
-            yearSelector.value = 'recent';
-            generateCalendar(null, false);
-            calendarGenerated = true;
-        }
-        scheduleNextUpdate();
-    });
+    // 初始调用以开始定时更新
+    scheduleNextUpdate();
 });
