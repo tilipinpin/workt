@@ -18,7 +18,7 @@
  3.3 在右侧找到 "删除和阻止访问“关闭”命令"，双击打开。  
  3.4 将设置改为 "已启用"，然后点击 "确定"。  
 这将隐藏关机按钮，包括在开始菜单、Ctrl+Alt+Del 界面等地方。
-#### 4. 软件适应于WINDOWS10系统，其他版本未知 。试过用自动任务程序监听关机触发shutdown，也用过关机钩子，时灵时不灵。
+#### 4. 软件适应于WINDOWS11系统，其他版本未知 。试过用自动任务程序监听关机触发shutdown，也用过关机钩子，时灵时不灵。
 #### 5.python打包程序代码段：   
 pyinstaller --onefile --icon=my_datetime.ico my_datetime.py   
 pyinstaller --onefile --icon=shutdown.ico myshutdown.py   
