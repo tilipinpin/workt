@@ -9,7 +9,7 @@ date_str = now.strftime("%Y-%m-%d")
 time_str = now.strftime("%H:%M:%S")
 
 # GitHub仓库信息
-token = "ghp_XXXXXXX"  # 替换为您的GitHub访问令牌
+token = "ghp_XXX"  # 替换为您的GitHub访问令牌
 repo_name = "tilipinpin/workt"  # 替换为您的GitHub仓库名
 file_path = "date/usage_data.csv"  # GitHub上文件的相对路径
 
