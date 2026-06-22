@@ -4,9 +4,141 @@ document.addEventListener("DOMContentLoaded", function() {
     const weeksContainer = document.querySelector(".weeks");
     const tooltip = document.getElementById("tooltip");
     const yearSelector = document.getElementById("yearSelector");
+    const manualEntryToggle = document.getElementById("manualEntryToggle");
+    const manualEntryPanel = document.getElementById("manualEntryPanel");
+    const entryDate = document.getElementById("entryDate");
+    const entryTypeButtons = document.querySelectorAll(".entry-type-btn");
+    const entryRemark = document.getElementById("entryRemark");
+    const entrySubmit = document.getElementById("entrySubmit");
+    const entryStatus = document.getElementById("entryStatus");
+
+    const isLocalDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    const DATA_URL = isLocalDev
+        ? "date/usage_data.csv"
+        : "https://raw.githubusercontent.com/tilipinpin/workt/main/date/usage_data.csv";
 
     let usageData = {};
     let calendarGenerated = false;
+    let monthLabelsResizeHandler = null;
+    let monthLabelsState = null;
+
+    function refreshCalendar() {
+        const selectedValue = yearSelector.value;
+        if (selectedValue === "recent") {
+            generateCalendar(null, false);
+        } else {
+            generateCalendar(parseInt(selectedValue, 10), true);
+        }
+    }
+
+    function parseUsageCsv(data) {
+        usageData = {};
+        data.split("\n").forEach(function(row) {
+            const trimmed = row.trim();
+            if (!trimmed || trimmed.startsWith("日期")) {
+                return;
+            }
+
+            const [date, startTime, endTime, hours, businessTripAddress] = row.split(",");
+            const parsedHours = parseFloat(hours);
+            if (!isNaN(parsedHours)) {
+                const year = date.split("-")[0];
+                if (!usageData[year]) {
+                    usageData[year] = {};
+                }
+                usageData[year][date] = {
+                    startTime: startTime || "",
+                    endTime: endTime || "",
+                    hours: parsedHours,
+                    address: businessTripAddress || ""
+                };
+            } else {
+                console.warn("无效的使用时间: " + hours + "，日期: " + date);
+            }
+        });
+    }
+
+    let selectedEntryType = "leave";
+
+    function setEntryStatus(message, type) {
+        entryStatus.textContent = message;
+        entryStatus.className = "entry-status" + (type ? " " + type : "");
+    }
+
+    function closeManualEntryPanel() {
+        manualEntryToggle.setAttribute("aria-expanded", "false");
+        manualEntryPanel.hidden = true;
+        setEntryStatus("", "");
+    }
+
+    function initManualEntry() {
+        entryDate.value = new Date().toISOString().split("T")[0];
+
+        entryTypeButtons.forEach(function(button) {
+            button.addEventListener("click", function() {
+                entryTypeButtons.forEach(function(item) { item.classList.remove("active"); });
+                button.classList.add("active");
+                selectedEntryType = button.getAttribute("data-type");
+            });
+        });
+
+        manualEntryToggle.addEventListener("click", function() {
+            const expanded = manualEntryToggle.getAttribute("aria-expanded") === "true";
+            manualEntryToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+            manualEntryPanel.hidden = expanded;
+            if (!expanded) {
+                entryDate.focus({ preventScroll: true });
+            }
+        });
+
+        entrySubmit.addEventListener("click", function() {
+            if (!entryDate.value) {
+                setEntryStatus("请选择日期", "error");
+                return;
+            }
+
+            if (!isLocalDev) {
+                setEntryStatus("手动录入需使用本地 server.py 启动", "error");
+                return;
+            }
+
+            entrySubmit.disabled = true;
+            setEntryStatus("保存中...", "");
+
+            fetch("/api/entry", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    date: entryDate.value,
+                    type: selectedEntryType,
+                    remark: entryRemark.value
+                })
+            })
+                .then(function(response) {
+                    return response.json().then(function(data) {
+                        if (!response.ok || !data.ok) {
+                            throw new Error(data.error || "保存失败");
+                        }
+                        return data;
+                    });
+                })
+                .then(function(data) {
+                    entryRemark.value = "";
+                    closeManualEntryPanel();
+                    return loadUsageData(true).then(function() {
+                        refreshCalendar();
+                    });
+                })
+                .catch(function(error) {
+                    setEntryStatus(error.message, "error");
+                })
+                .finally(function() {
+                    entrySubmit.disabled = false;
+                });
+        });
+    }
+
+    initManualEntry();
 
     // 生成年份选择器
     function generateYearSelector() {
@@ -34,36 +166,19 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // 数据加载逻辑
-    function loadUsageData() {
-        return fetch('https://raw.githubusercontent.com/tilipinpin/workt/main/date/usage_data.csv')
-            .then(response => response.text())
-            .then(data => {
-                const rows = data.split('\n');
-                rows.forEach(row => {
-                    const [date, startTime, endTime, hours, businessTripAddress] = row.split(',');
-                    const parsedHours = parseFloat(hours);
-                    if (!isNaN(parsedHours)) {
-                        const year = date.split('-')[0];
-                        if (!usageData[year]) {
-                            usageData[year] = {};
-                        }
-                        usageData[year][date] = {
-                            startTime: startTime,
-                            endTime: endTime,
-                            hours: parsedHours,
-                            address: businessTripAddress
-                        };
-                    } else {
-                        console.warn(`无效的使用时间: ${hours}，日期: ${date}`);
-                    }
-                });
+    function loadUsageData(forceReload) {
+        const url = forceReload ? DATA_URL + "?t=" + Date.now() : DATA_URL;
+        return fetch(url)
+            .then(function(response) { return response.text(); })
+            .then(function(data) {
+                parseUsageCsv(data);
                 if (!calendarGenerated) {
-                    yearSelector.value = 'recent';
+                    yearSelector.value = "recent";
                     generateCalendar(null, false);
                     calendarGenerated = true;
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(function(error) { console.error("Error:", error); });
     }
 
     function generateCalendar(selectedYear, isYearSelected) {
@@ -144,10 +259,12 @@ document.addEventListener("DOMContentLoaded", function() {
                             daysOver17Hours++;
                         }
 
-                        const endTime = new Date(`1970-01-01T${usage.endTime.split(':').slice(0, 2).join(':')}:00`);
-                        const overtimeThreshold = new Date(`1970-01-01T17:30:00`);
-                        if (endTime > overtimeThreshold) {
-                            overtimeDays++;
+                        if (usage.endTime && usage.endTime.trim()) {
+                            const endTime = new Date("1970-01-01T" + usage.endTime.split(":").slice(0, 2).join(":") + ":00");
+                            const overtimeThreshold = new Date("1970-01-01T17:30:00");
+                            if (endTime > overtimeThreshold) {
+                                overtimeDays++;
+                            }
                         }
                     }
                 }
@@ -188,15 +305,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays, year) {
-        const statsContainer = document.querySelector('.stats-container') || document.createElement('div');
-        statsContainer.classList.add('stats-container');
-        
+        const statsContainer = document.getElementById("statsContainer");
         const displayYear = year || new Date().getFullYear();
-        
-        statsContainer.innerHTML = `
-           <span>${days} working days in ${displayYear}</span><span class="hours-text">(${hours.toFixed(1)} hours)</span>
-        `;
-        calendar.appendChild(statsContainer);
+
+        statsContainer.innerHTML =
+            "<span>" + days + " working days in " + displayYear + "</span>" +
+            "<span class=\"hours-text\">(" + hours.toFixed(1) + " hours)</span>";
 
         // 更新加班统计图例
         let legendOvertime = document.querySelector('.legend-overtime');
@@ -224,45 +338,61 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function updateMonthLabels(startDate, selectedYear) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        monthsContainer.innerHTML = '';
+        monthLabelsState = { startDate: new Date(startDate), selectedYear: selectedYear };
 
         const updateLabels = () => {
+            if (!monthLabelsState) {
+                return;
+            }
+
             monthsContainer.innerHTML = '';
             const containerWidth = weeksContainer.offsetWidth;
+            if (!containerWidth) {
+                return;
+            }
+
             const squareWidth = containerWidth / 53;
             const labelOffset = 25;
             const topOffset = 10;
 
-            let currentDate = new Date(startDate);
-            currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // 从周日开始
+            let currentDate = new Date(monthLabelsState.startDate);
+            currentDate.setDate(currentDate.getDate() - currentDate.getDay());
 
             let lastMonth = -1;
 
             for (let i = 0; i < 53; i++) {
                 const monthIndex = currentDate.getMonth();
-                // 生成53周方格的月份标签
                 if (monthIndex !== lastMonth) {
                     const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
                     const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
-                    
-                    // 确保每个年份都显示12个月份的标签
-                    if (daysSinceMonthStart < 14 || (selectedYear === 2023 && i === 0)) {
+
+                    if (daysSinceMonthStart < 14 || (monthLabelsState.selectedYear === 2023 && i === 0)) {
                         const monthDiv = document.createElement('div');
                         monthDiv.textContent = months[monthIndex];
-                        const leftOffset = i * squareWidth + labelOffset;
-                        monthDiv.style.left = `${leftOffset}px`;
-                        monthDiv.style.top = `${topOffset}px`;
+                        monthDiv.style.left = (i * squareWidth + labelOffset) + 'px';
+                        monthDiv.style.top = topOffset + 'px';
                         monthDiv.style.position = 'absolute';
                         monthsContainer.appendChild(monthDiv);
-                        lastMonth = monthIndex; // 更新最后一个月份
+                        lastMonth = monthIndex;
                     }
                 }
-                currentDate.setDate(currentDate.getDate() + 7); // 每次增加一周
+                currentDate.setDate(currentDate.getDate() + 7);
             }
         };
 
-        updateLabels();
-        window.addEventListener('resize', updateLabels);
+        const scheduleUpdateLabels = () => {
+            requestAnimationFrame(function() {
+                requestAnimationFrame(updateLabels);
+            });
+        };
+
+        if (monthLabelsResizeHandler) {
+            window.removeEventListener('resize', monthLabelsResizeHandler);
+        }
+
+        monthLabelsResizeHandler = scheduleUpdateLabels;
+        scheduleUpdateLabels();
+        window.addEventListener('resize', monthLabelsResizeHandler);
     }
 
     function scheduleNextUpdate() {
@@ -274,15 +404,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
         setTimeout(function() {
             console.log("执行午夜更新"); // 添加日志
-            loadUsageData().then(() => {
-                const selectedValue = yearSelector.value;
-                if (selectedValue === 'recent') {
-                    generateCalendar(null, false);
-                } else {
-                    const selectedYear = parseInt(selectedValue);
-                    generateCalendar(selectedYear, true);
-                }
-                scheduleNextUpdate(); // 安排下一次更新
+            loadUsageData(true).then(function() {
+                refreshCalendar();
+                scheduleNextUpdate();
             });
         }, timeUntilMidnight);
     }
