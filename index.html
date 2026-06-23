@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>年度工作时间统计</title>
-    <link rel="stylesheet" href="styles.css?v=17">
+    <link rel="stylesheet" href="styles.css?v=18">
 </head>
 <body>
     <div class="container">
@@ -49,13 +49,19 @@
             <div class="calendar-footer">
                 <div class="calendar-footer-row">
                     <div id="statsContainer" class="stats-container"></div>
-                    <div class="calendar-footer-actions">
-                        <button type="button" id="tokenSettingsBtn" class="token-settings-btn" aria-haspopup="dialog" title="GitHub Token 设置">Token</button>
-                        <button type="button" id="manualEntryToggle" class="manual-entry-btn" aria-expanded="false">手动录入</button>
-                    </div>
+                    <button type="button" id="manualEntryToggle" class="manual-entry-btn" aria-expanded="false">手动录入</button>
                 </div>
                 <div class="manual-entry-panel-slot">
                     <div id="manualEntryPanel" class="manual-entry-panel" hidden>
+                    <div id="entryTokenSection" class="entry-token-section">
+                        <label class="entry-field entry-field-token">
+                            <span>GitHub Token</span>
+                            <input type="password" id="tokenInput" autocomplete="off" inputmode="text" placeholder="ghp_...（首次使用必填）">
+                            <button type="button" id="tokenSave" class="entry-token-save-btn">保存 Token</button>
+                            <button type="button" id="tokenClear" class="entry-token-clear-btn">清除</button>
+                        </label>
+                        <span id="tokenStatus" class="entry-token-status" role="status"></span>
+                    </div>
                     <label class="entry-field">
                         <span>日期</span>
                         <input type="date" id="entryDate" required>
@@ -94,23 +100,6 @@
         </div>
         <div class="tooltip" id="tooltip"></div>
     </div>
-    <dialog id="tokenDialog" class="token-dialog">
-        <form method="dialog" class="token-dialog-form" id="tokenForm">
-            <h3 class="token-dialog-title">GitHub Token 设置</h3>
-            <p class="token-dialog-hint">电脑和手机用法相同：首次使用在此填入 GitHub Token，之后点「手动录入」保存即可。Token 只存在本设备浏览器，不会写入仓库。</p>
-            <label class="token-dialog-field">
-                <span>Personal Access Token</span>
-                <input type="password" id="tokenInput" autocomplete="off" inputmode="text" placeholder="ghp_...">
-            </label>
-            <p class="token-dialog-note">需勾选仓库 <strong>Contents: Read and write</strong> 权限。</p>
-            <div class="token-dialog-actions">
-                <button type="submit" class="token-dialog-save">保存</button>
-                <button type="button" id="tokenClear" class="token-dialog-clear">清除</button>
-                <button type="button" id="tokenClose" class="token-dialog-close">关闭</button>
-            </div>
-            <p id="tokenStatus" class="token-status" role="status"></p>
-        </form>
-    </dialog>
-    <script src="script.js?v=17"></script>
+    <script src="script.js?v=19"></script>
 </body>
 </html>
