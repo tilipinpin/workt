@@ -11,11 +11,21 @@ document.addEventListener("DOMContentLoaded", function() {
     const entryRemark = document.getElementById("entryRemark");
     const entrySubmit = document.getElementById("entrySubmit");
     const entryStatus = document.getElementById("entryStatus");
+    const onSiteFields = document.getElementById("onSiteFields");
+    const entryStartTime = document.getElementById("entryStartTime");
+    const entryEndTime = document.getElementById("entryEndTime");
+    const entryHours = document.getElementById("entryHours");
 
-    const isLocalDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const DATA_URL = isLocalDev
-        ? "date/usage_data.csv"
-        : "https://raw.githubusercontent.com/tilipinpin/workt/main/date/usage_data.csv";
+    const GITHUB_REPO = "tilipinpin/workt";
+    const GITHUB_FILE_PATH = "date/usage_data.csv";
+    const GITHUB_RAW_URL = "https://raw.githubusercontent.com/" + GITHUB_REPO + "/main/" + GITHUB_FILE_PATH;
+    const DATA_URL = GITHUB_RAW_URL;
+
+    const ENTRY_TYPES = {
+        leave: { hours: "17", start: "00:00:00", end: "00:00:00", defaultRemark: "请假" },
+        business_trip: { hours: "16", start: "00:00:00", end: "00:00:00", defaultRemark: "出差" },
+        on_site: { hours: "8.75", start: " ", end: " ", defaultRemark: "现场服务" }
+    };
 
     let usageData = {};
     let calendarGenerated = false;
@@ -65,6 +75,244 @@ document.addEventListener("DOMContentLoaded", function() {
         entryStatus.className = "entry-status" + (type ? " " + type : "");
     }
 
+    function normalizeTimeValue(value, fallback) {
+        const raw = (value || fallback || "").trim();
+        if (!raw) {
+            return fallback;
+        }
+        const parts = raw.split(":");
+        if (parts.length === 2) {
+            return parts[0] + ":" + parts[1] + ":00";
+        }
+        return raw;
+    }
+
+    function parseTimeToSeconds(timeStr) {
+        const normalized = normalizeTimeValue(timeStr, "00:00:00");
+        const parts = normalized.split(":");
+        const hours = parseInt(parts[0], 10);
+        const minutes = parseInt(parts[1], 10);
+        const seconds = parseInt(parts[2] || "0", 10);
+        return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    function formatHours(hours) {
+        return String(parseFloat(hours.toFixed(2)));
+    }
+
+    function calculateOnSiteHours(startTime, endTime) {
+        const startSeconds = parseTimeToSeconds(startTime);
+        const endSeconds = parseTimeToSeconds(endTime);
+        let diffSeconds = endSeconds - startSeconds;
+        if (diffSeconds < 0) {
+            diffSeconds += 24 * 3600;
+        }
+        return formatHours(diffSeconds / 3600);
+    }
+
+    function updateOnSiteHours() {
+        entryHours.value = calculateOnSiteHours(entryStartTime.value, entryEndTime.value);
+    }
+
+    function getOnSiteDefaults() {
+        return {
+            startTime: "8:30:00",
+            endTime: "17:31:00"
+        };
+    }
+
+    function resetOnSiteFields() {
+        entryStartTime.value = "08:30:00";
+        entryEndTime.value = "17:31:00";
+        updateOnSiteHours();
+    }
+
+    function updateEntryTypeUI(type) {
+        selectedEntryType = type;
+        onSiteFields.hidden = type !== "on_site";
+        if (type === "on_site") {
+            resetOnSiteFields();
+        }
+    }
+
+    function getEntryDetails(type, remark) {
+        if (type === "on_site") {
+            const startTime = normalizeTimeValue(entryStartTime.value, "8:30:00");
+            const endTime = normalizeTimeValue(entryEndTime.value, "17:31:00");
+            const hours = calculateOnSiteHours(startTime, endTime);
+            if (parseFloat(hours) <= 0) {
+                throw new Error("关机时间必须晚于开机时间");
+            }
+            return {
+                startTime: startTime,
+                endTime: endTime,
+                hours: hours,
+                remark: remark
+            };
+        }
+        return { remark: remark };
+    }
+
+    function buildCsvRow(date, type, remark, details) {
+        details = details || getEntryDetails(type, remark);
+        const config = ENTRY_TYPES[type];
+        if (!config) {
+            throw new Error("无效的类型");
+        }
+
+        if (type === "on_site") {
+            const mark = (details.remark || remark || "").trim() || config.defaultRemark;
+            return date + "," + details.startTime + "," + details.endTime + "," + details.hours + "," + mark;
+        }
+
+        const mark = (remark || "").trim() || config.defaultRemark;
+        return date + "," + config.start + "," + config.end + "," + config.hours + "," + mark;
+    }
+
+    function upsertCsvText(text, date, type, remark, details) {
+        const lines = text.split(/\r?\n/);
+        const header = "日期,开机时间,关机时间,使用时间，备注";
+        if (!lines.length || !lines[0].startsWith("日期")) {
+            lines.unshift(header);
+        }
+        const newRow = buildCsvRow(date, type, remark, details);
+        let updated = false;
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i].trim();
+            if (!row) {
+                continue;
+            }
+            if (row.split(",", 1)[0].trim() === date) {
+                lines[i] = newRow;
+                updated = true;
+                break;
+            }
+        }
+        if (!updated) {
+            lines.push(newRow);
+        }
+        return lines.filter(function(line, index) {
+            return index === 0 || line.trim();
+        }).join("\n") + "\n";
+    }
+
+    function base64ToUtf8(base64) {
+        return decodeURIComponent(escape(atob(base64.replace(/\n/g, ""))));
+    }
+
+    function utf8ToBase64(text) {
+        return btoa(unescape(encodeURIComponent(text)));
+    }
+
+    function isValidGitHubToken(token) {
+        return token &&
+            token.indexOf("XXXX") === -1 &&
+            token.indexOf("xxxx") === -1 &&
+            token.length > 10;
+    }
+
+    function getGitHubConfig() {
+        const config = window.GITHUB_CONFIG;
+        if (!config || !isValidGitHubToken(config.token)) {
+            return null;
+        }
+        return {
+            token: config.token,
+            repo: config.repo || GITHUB_REPO,
+            filePath: config.filePath || GITHUB_FILE_PATH
+        };
+    }
+
+    // 与 Python 脚本相同：GET 文件 SHA → 修改 CSV → PUT 回 GitHub
+    function saveEntryViaGitHub(date, type, remark, details) {
+        const config = getGitHubConfig();
+        if (!config) {
+            return Promise.reject(new Error("请在 github-config.js 中填入 GitHub Token（将 ghp_XXXX 替换为你的 Token）"));
+        }
+
+        const apiUrl = "https://api.github.com/repos/" + config.repo + "/contents/" + config.filePath;
+        const headers = {
+            Authorization: "token " + config.token,
+            Accept: "application/vnd.github.v3+json"
+        };
+
+        return fetch(apiUrl, { headers: headers })
+            .then(function(response) {
+                return response.json().then(function(fileInfo) {
+                    if (!response.ok) {
+                        throw new Error(fileInfo.message || "读取 GitHub 文件失败");
+                    }
+                    const sha = fileInfo.sha;
+                    const content = base64ToUtf8(fileInfo.content);
+                    const lines = content.trim().split("\n");
+                    const newRow = buildCsvRow(date, type, remark, details);
+                    let found = false;
+
+                    for (let i = 1; i < lines.length; i++) {
+                        if (lines[i].split(",")[0].trim() === date) {
+                            lines[i] = newRow;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        lines.push(newRow);
+                    }
+
+                    const newContent = lines.join("\n") + "\n";
+                    return fetch(apiUrl, {
+                        method: "PUT",
+                        headers: Object.assign({ "Content-Type": "application/json" }, headers),
+                        body: JSON.stringify({
+                            message: "手动录入 " + date,
+                            content: utf8ToBase64(newContent),
+                            sha: sha
+                        })
+                    });
+                });
+            })
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    if (!response.ok) {
+                        throw new Error(data.message || "写入 GitHub 失败");
+                    }
+                    return data;
+                });
+            });
+    }
+
+    function saveEntryViaApi(date, type, remark, details) {
+        const payload = {
+            date: date,
+            type: type,
+            remark: remark
+        };
+        if (type === "on_site") {
+            payload.startTime = details.startTime;
+            payload.endTime = details.endTime;
+            payload.hours = details.hours;
+        }
+        return fetch("/api/entry", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }).then(function(response) {
+            return response.json().then(function(data) {
+                if (!response.ok || !data.ok) {
+                    throw new Error(data.error || "保存失败");
+                }
+                return data;
+            });
+        });
+    }
+
+    function saveEntry(date, type, remark, details) {
+        if (getGitHubConfig()) {
+            return saveEntryViaGitHub(date, type, remark, details);
+        }
+        return saveEntryViaApi(date, type, remark, details);
+    }
+
     function closeManualEntryPanel() {
         manualEntryToggle.setAttribute("aria-expanded", "false");
         manualEntryPanel.hidden = true;
@@ -78,9 +326,14 @@ document.addEventListener("DOMContentLoaded", function() {
             button.addEventListener("click", function() {
                 entryTypeButtons.forEach(function(item) { item.classList.remove("active"); });
                 button.classList.add("active");
-                selectedEntryType = button.getAttribute("data-type");
+                updateEntryTypeUI(button.getAttribute("data-type"));
             });
         });
+
+        entryStartTime.addEventListener("input", updateOnSiteHours);
+        entryStartTime.addEventListener("change", updateOnSiteHours);
+        entryEndTime.addEventListener("input", updateOnSiteHours);
+        entryEndTime.addEventListener("change", updateOnSiteHours);
 
         manualEntryToggle.addEventListener("click", function() {
             const expanded = manualEntryToggle.getAttribute("aria-expanded") === "true";
@@ -97,33 +350,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
 
-            if (!isLocalDev) {
-                setEntryStatus("手动录入需使用本地 server.py 启动", "error");
-                return;
-            }
-
             entrySubmit.disabled = true;
             setEntryStatus("保存中...", "");
 
-            fetch("/api/entry", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    date: entryDate.value,
-                    type: selectedEntryType,
-                    remark: entryRemark.value
-                })
-            })
-                .then(function(response) {
-                    return response.json().then(function(data) {
-                        if (!response.ok || !data.ok) {
-                            throw new Error(data.error || "保存失败");
-                        }
-                        return data;
-                    });
-                })
-                .then(function(data) {
+            let details;
+            try {
+                details = getEntryDetails(selectedEntryType, entryRemark.value);
+            } catch (error) {
+                setEntryStatus(error.message, "error");
+                return;
+            }
+
+            saveEntry(entryDate.value, selectedEntryType, entryRemark.value, details)
+                .then(function() {
                     entryRemark.value = "";
+                    if (selectedEntryType === "on_site") {
+                        resetOnSiteFields();
+                    }
                     closeManualEntryPanel();
                     return loadUsageData(true).then(function() {
                         refreshCalendar();
@@ -167,17 +410,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 数据加载逻辑
     function loadUsageData(forceReload) {
+        function applyData(data) {
+            parseUsageCsv(data);
+            if (!calendarGenerated) {
+                yearSelector.value = "recent";
+                generateCalendar(null, false);
+                calendarGenerated = true;
+            }
+        }
+
         const url = forceReload ? DATA_URL + "?t=" + Date.now() : DATA_URL;
         return fetch(url)
             .then(function(response) { return response.text(); })
-            .then(function(data) {
-                parseUsageCsv(data);
-                if (!calendarGenerated) {
-                    yearSelector.value = "recent";
-                    generateCalendar(null, false);
-                    calendarGenerated = true;
-                }
-            })
+            .then(applyData)
             .catch(function(error) { console.error("Error:", error); });
     }
 
