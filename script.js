@@ -6,6 +6,13 @@ document.addEventListener("DOMContentLoaded", function() {
     const yearSelector = document.getElementById("yearSelector");
     const manualEntryToggle = document.getElementById("manualEntryToggle");
     const manualEntryPanel = document.getElementById("manualEntryPanel");
+    const tokenSettingsBtn = document.getElementById("tokenSettingsBtn");
+    const tokenDialog = document.getElementById("tokenDialog");
+    const tokenForm = document.getElementById("tokenForm");
+    const tokenInput = document.getElementById("tokenInput");
+    const tokenClear = document.getElementById("tokenClear");
+    const tokenClose = document.getElementById("tokenClose");
+    const tokenStatus = document.getElementById("tokenStatus");
     const entryDate = document.getElementById("entryDate");
     const entryTypeButtons = document.querySelectorAll(".entry-type-btn");
     const entryRemark = document.getElementById("entryRemark");
@@ -20,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const GITHUB_FILE_PATH = "date/usage_data.csv";
     const GITHUB_RAW_URL = "https://raw.githubusercontent.com/" + GITHUB_REPO + "/main/" + GITHUB_FILE_PATH;
     const DATA_URL = GITHUB_RAW_URL;
+    const TOKEN_STORAGE_KEY = "workt_github_token";
 
     const ENTRY_TYPES = {
         leave: { hours: "17", start: "00:00:00", end: "00:00:00", defaultRemark: "请假" },
@@ -211,23 +219,120 @@ document.addEventListener("DOMContentLoaded", function() {
             token.length > 10;
     }
 
+    function getStoredToken() {
+        try {
+            return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
+        } catch (error) {
+            return "";
+        }
+    }
+
+    function setStoredToken(token) {
+        localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    }
+
+    function clearStoredToken() {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+
     function getGitHubConfig() {
-        const config = window.GITHUB_CONFIG;
-        if (!config || !isValidGitHubToken(config.token)) {
+        const storedToken = getStoredToken();
+        if (!isValidGitHubToken(storedToken)) {
             return null;
         }
         return {
-            token: config.token,
-            repo: config.repo || GITHUB_REPO,
-            filePath: config.filePath || GITHUB_FILE_PATH
+            token: storedToken,
+            repo: GITHUB_REPO,
+            filePath: GITHUB_FILE_PATH
         };
+    }
+
+    function hasGitHubWriteAccess() {
+        return !!getGitHubConfig();
+    }
+
+    function setTokenStatus(message, type) {
+        tokenStatus.textContent = message;
+        tokenStatus.className = "token-status" + (type ? " " + type : "");
+    }
+
+    function updateTokenSettingsButton() {
+        if (!tokenSettingsBtn) {
+            return;
+        }
+        const configured = hasGitHubWriteAccess();
+        tokenSettingsBtn.classList.toggle("token-configured", configured);
+        tokenSettingsBtn.setAttribute("aria-label", configured ? "GitHub Token 已配置" : "设置 GitHub Token");
+    }
+
+    function openTokenDialog() {
+        if (!tokenDialog) {
+            return;
+        }
+        tokenInput.value = getStoredToken();
+        setTokenStatus("", "");
+        if (typeof tokenDialog.showModal === "function") {
+            tokenDialog.showModal();
+        } else {
+            tokenDialog.setAttribute("open", "");
+        }
+        tokenInput.focus({ preventScroll: true });
+    }
+
+    function closeTokenDialog() {
+        if (!tokenDialog) {
+            return;
+        }
+        if (typeof tokenDialog.close === "function") {
+            tokenDialog.close();
+        } else {
+            tokenDialog.removeAttribute("open");
+        }
+    }
+
+    function initTokenSettings() {
+        if (!tokenSettingsBtn || !tokenDialog) {
+            return;
+        }
+
+        updateTokenSettingsButton();
+
+        tokenSettingsBtn.addEventListener("click", openTokenDialog);
+
+        tokenForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const token = tokenInput.value.trim();
+            if (!isValidGitHubToken(token)) {
+                setTokenStatus("请输入有效的 GitHub Token（ghp_ 开头）", "error");
+                return;
+            }
+            setStoredToken(token);
+            setTokenStatus("已保存，可直接手动录入。", "success");
+            updateTokenSettingsButton();
+            setTimeout(closeTokenDialog, 600);
+        });
+
+        tokenClear.addEventListener("click", function() {
+            clearStoredToken();
+            tokenInput.value = "";
+            setTokenStatus("已清除本设备 Token", "info");
+            updateTokenSettingsButton();
+        });
+
+        tokenClose.addEventListener("click", closeTokenDialog);
+
+        tokenDialog.addEventListener("click", function(event) {
+            if (event.target === tokenDialog) {
+                closeTokenDialog();
+            }
+        });
     }
 
     // 与 Python 脚本相同：GET 文件 SHA → 修改 CSV → PUT 回 GitHub
     function saveEntryViaGitHub(date, type, remark, details) {
         const config = getGitHubConfig();
         if (!config) {
-            return Promise.reject(new Error("请在 github-config.js 中填入 GitHub Token（将 ghp_XXXX 替换为你的 Token）"));
+            return Promise.reject(new Error("未配置 GitHub Token，请先点击「Token」按钮填入"));
         }
 
         const apiUrl = "https://api.github.com/repos/" + config.repo + "/contents/" + config.filePath;
@@ -281,36 +386,8 @@ document.addEventListener("DOMContentLoaded", function() {
             });
     }
 
-    function saveEntryViaApi(date, type, remark, details) {
-        const payload = {
-            date: date,
-            type: type,
-            remark: remark
-        };
-        if (type === "on_site") {
-            payload.startTime = details.startTime;
-            payload.endTime = details.endTime;
-            payload.hours = details.hours;
-        }
-        return fetch("/api/entry", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        }).then(function(response) {
-            return response.json().then(function(data) {
-                if (!response.ok || !data.ok) {
-                    throw new Error(data.error || "保存失败");
-                }
-                return data;
-            });
-        });
-    }
-
     function saveEntry(date, type, remark, details) {
-        if (getGitHubConfig()) {
-            return saveEntryViaGitHub(date, type, remark, details);
-        }
-        return saveEntryViaApi(date, type, remark, details);
+        return saveEntryViaGitHub(date, type, remark, details);
     }
 
     function closeManualEntryPanel() {
@@ -340,6 +417,9 @@ document.addEventListener("DOMContentLoaded", function() {
             manualEntryToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
             manualEntryPanel.hidden = expanded;
             if (!expanded) {
+                if (!hasGitHubWriteAccess()) {
+                    setEntryStatus("保存需 GitHub Token，请先点「Token」设置", "error");
+                }
                 entryDate.focus({ preventScroll: true });
             }
         });
@@ -374,6 +454,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 })
                 .catch(function(error) {
                     setEntryStatus(error.message, "error");
+                    if (!hasGitHubWriteAccess()) {
+                        openTokenDialog();
+                    }
                 })
                 .finally(function() {
                     entrySubmit.disabled = false;
@@ -381,6 +464,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    initTokenSettings();
     initManualEntry();
 
     // 生成年份选择器

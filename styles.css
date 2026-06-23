@@ -670,6 +670,14 @@ body {
     width: 100%;
 }
 
+.calendar-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
 .manual-entry-panel-slot {
     position: relative;
     width: 100%;
@@ -717,7 +725,6 @@ body {
 
 .manual-entry-btn {
     flex-shrink: 0;
-    margin-left: auto;
     white-space: nowrap;
     padding: 4px 8px;
     font-size: 12px;
@@ -854,6 +861,121 @@ body {
     color: #c62828;
 }
 
+.token-settings-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    color: #666;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    line-height: normal;
+}
+
+.token-settings-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #999;
+}
+
+.token-settings-btn.token-configured {
+    color: #2e7d32;
+    border-color: #81c784;
+    background-color: #f1f8e9;
+}
+
+.token-dialog {
+    border: none;
+    border-radius: 8px;
+    padding: 0;
+    max-width: calc(100vw - 32px);
+    width: 360px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.token-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.token-dialog-form {
+    padding: 20px;
+    margin: 0;
+}
+
+.token-dialog-title {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.token-dialog-hint,
+.token-dialog-note {
+    margin: 0 0 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.token-dialog-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+    font-size: 12px;
+}
+
+.token-dialog-field input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.token-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.token-dialog-actions button {
+    padding: 8px 14px;
+    font-size: 13px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8f8f8;
+    cursor: pointer;
+}
+
+.token-dialog-save {
+    background: #309f46 !important;
+    border-color: #309f46 !important;
+    color: #fff !important;
+}
+
+.token-status {
+    margin: 12px 0 0;
+    font-size: 12px;
+    min-height: 1.2em;
+}
+
+.token-status.success {
+    color: #2e7d32;
+}
+
+.token-status.error {
+    color: #c62828;
+}
+
+.token-status.info {
+    color: #666;
+}
+
 @media (max-width: 768px) {
     .manual-entry-panel-slot {
         min-height: 200px;
@@ -868,8 +990,12 @@ body {
         flex-wrap: wrap;
     }
 
-    .manual-entry-btn {
+    .calendar-footer-actions {
         margin-left: auto;
+    }
+
+    .manual-entry-btn {
+        margin-left: 0;
     }
 
     .manual-entry-panel {

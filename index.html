@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>年度工作时间统计</title>
-    <link rel="stylesheet" href="styles.css?v=16">
+    <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
     <div class="container">
@@ -49,7 +49,10 @@
             <div class="calendar-footer">
                 <div class="calendar-footer-row">
                     <div id="statsContainer" class="stats-container"></div>
-                    <button type="button" id="manualEntryToggle" class="manual-entry-btn" aria-expanded="false">手动录入</button>
+                    <div class="calendar-footer-actions">
+                        <button type="button" id="tokenSettingsBtn" class="token-settings-btn" aria-haspopup="dialog" title="GitHub Token 设置">Token</button>
+                        <button type="button" id="manualEntryToggle" class="manual-entry-btn" aria-expanded="false">手动录入</button>
+                    </div>
                 </div>
                 <div class="manual-entry-panel-slot">
                     <div id="manualEntryPanel" class="manual-entry-panel" hidden>
@@ -91,7 +94,23 @@
         </div>
         <div class="tooltip" id="tooltip"></div>
     </div>
-    <script src="github-config.js" onerror="window.GITHUB_CONFIG=null"></script>
-    <script src="script.js?v=15"></script>
+    <dialog id="tokenDialog" class="token-dialog">
+        <form method="dialog" class="token-dialog-form" id="tokenForm">
+            <h3 class="token-dialog-title">GitHub Token 设置</h3>
+            <p class="token-dialog-hint">电脑和手机用法相同：首次使用在此填入 GitHub Token，之后点「手动录入」保存即可。Token 只存在本设备浏览器，不会写入仓库。</p>
+            <label class="token-dialog-field">
+                <span>Personal Access Token</span>
+                <input type="password" id="tokenInput" autocomplete="off" inputmode="text" placeholder="ghp_...">
+            </label>
+            <p class="token-dialog-note">需勾选仓库 <strong>Contents: Read and write</strong> 权限。</p>
+            <div class="token-dialog-actions">
+                <button type="submit" class="token-dialog-save">保存</button>
+                <button type="button" id="tokenClear" class="token-dialog-clear">清除</button>
+                <button type="button" id="tokenClose" class="token-dialog-close">关闭</button>
+            </div>
+            <p id="tokenStatus" class="token-status" role="status"></p>
+        </form>
+    </dialog>
+    <script src="script.js?v=17"></script>
 </body>
 </html>
