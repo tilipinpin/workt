@@ -6,12 +6,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const yearSelector = document.getElementById("yearSelector");
     const manualEntryToggle = document.getElementById("manualEntryToggle");
     const manualEntryPanel = document.getElementById("manualEntryPanel");
-    const tokenSettingsBtn = document.getElementById("tokenSettingsBtn");
-    const tokenDialog = document.getElementById("tokenDialog");
-    const tokenForm = document.getElementById("tokenForm");
+    const entryTokenSection = document.getElementById("entryTokenSection");
     const tokenInput = document.getElementById("tokenInput");
+    const tokenSave = document.getElementById("tokenSave");
     const tokenClear = document.getElementById("tokenClear");
-    const tokenClose = document.getElementById("tokenClose");
     const tokenStatus = document.getElementById("tokenStatus");
     const entryDate = document.getElementById("entryDate");
     const entryTypeButtons = document.querySelectorAll(".entry-type-btn");
@@ -129,6 +127,14 @@ document.addEventListener("DOMContentLoaded", function() {
         };
     }
 
+    function getTodayDateString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        return year + "-" + month + "-" + day;
+    }
+
     function resetOnSiteFields() {
         entryStartTime.value = "08:30:00";
         entryEndTime.value = "17:31:00";
@@ -139,6 +145,7 @@ document.addEventListener("DOMContentLoaded", function() {
         selectedEntryType = type;
         onSiteFields.hidden = type !== "on_site";
         if (type === "on_site") {
+            entryDate.value = getTodayDateString();
             resetOnSiteFields();
         }
     }
@@ -252,79 +259,56 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function setTokenStatus(message, type) {
+        if (!tokenStatus) {
+            return;
+        }
         tokenStatus.textContent = message;
-        tokenStatus.className = "token-status" + (type ? " " + type : "");
+        tokenStatus.className = "entry-token-status" + (type ? " " + type : "");
     }
 
-    function updateTokenSettingsButton() {
-        if (!tokenSettingsBtn) {
+    function updateTokenSectionUI() {
+        if (!entryTokenSection || !tokenInput) {
             return;
         }
         const configured = hasGitHubWriteAccess();
-        tokenSettingsBtn.classList.toggle("token-configured", configured);
-        tokenSettingsBtn.setAttribute("aria-label", configured ? "GitHub Token 已配置" : "设置 GitHub Token");
+        entryTokenSection.classList.toggle("token-configured", configured);
+        tokenInput.placeholder = configured
+            ? "已配置，输入新 Token 可更换"
+            : "ghp_...（需 Contents 读写权限）";
     }
 
-    function openTokenDialog() {
-        if (!tokenDialog) {
-            return;
-        }
-        tokenInput.value = getStoredToken();
-        setTokenStatus("", "");
-        if (typeof tokenDialog.showModal === "function") {
-            tokenDialog.showModal();
-        } else {
-            tokenDialog.setAttribute("open", "");
-        }
-        tokenInput.focus({ preventScroll: true });
-    }
-
-    function closeTokenDialog() {
-        if (!tokenDialog) {
-            return;
-        }
-        if (typeof tokenDialog.close === "function") {
-            tokenDialog.close();
-        } else {
-            tokenDialog.removeAttribute("open");
+    function focusTokenInput() {
+        if (tokenInput) {
+            tokenInput.focus({ preventScroll: true });
         }
     }
 
     function initTokenSettings() {
-        if (!tokenSettingsBtn || !tokenDialog) {
+        if (!tokenInput || !tokenSave || !tokenClear) {
             return;
         }
 
-        updateTokenSettingsButton();
+        updateTokenSectionUI();
 
-        tokenSettingsBtn.addEventListener("click", openTokenDialog);
-
-        tokenForm.addEventListener("submit", function(event) {
-            event.preventDefault();
+        tokenSave.addEventListener("click", function() {
             const token = tokenInput.value.trim();
             if (!isValidGitHubToken(token)) {
-                setTokenStatus("请输入有效的 GitHub Token（ghp_ 开头）", "error");
+                setTokenStatus("请输入有效的 GitHub Token", "error");
+                focusTokenInput();
                 return;
             }
             setStoredToken(token);
-            setTokenStatus("已保存，可直接手动录入。", "success");
-            updateTokenSettingsButton();
-            setTimeout(closeTokenDialog, 600);
+            tokenInput.value = "";
+            setTokenStatus("Token 已保存", "success");
+            updateTokenSectionUI();
         });
 
         tokenClear.addEventListener("click", function() {
             clearStoredToken();
             tokenInput.value = "";
-            setTokenStatus("已清除本设备 Token", "info");
-            updateTokenSettingsButton();
-        });
-
-        tokenClose.addEventListener("click", closeTokenDialog);
-
-        tokenDialog.addEventListener("click", function(event) {
-            if (event.target === tokenDialog) {
-                closeTokenDialog();
-            }
+            setTokenStatus("已清除 Token", "info");
+            updateTokenSectionUI();
+            focusTokenInput();
         });
     }
 
@@ -332,7 +316,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function saveEntryViaGitHub(date, type, remark, details) {
         const config = getGitHubConfig();
         if (!config) {
-            return Promise.reject(new Error("未配置 GitHub Token，请先点击「Token」按钮填入"));
+            return Promise.reject(new Error("未配置 GitHub Token，请在上方填入并保存"));
         }
 
         const apiUrl = "https://api.github.com/repos/" + config.repo + "/contents/" + config.filePath;
@@ -397,7 +381,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function initManualEntry() {
-        entryDate.value = new Date().toISOString().split("T")[0];
+        entryDate.value = getTodayDateString();
 
         entryTypeButtons.forEach(function(button) {
             button.addEventListener("click", function() {
@@ -417,8 +401,11 @@ document.addEventListener("DOMContentLoaded", function() {
             manualEntryToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
             manualEntryPanel.hidden = expanded;
             if (!expanded) {
+                if (selectedEntryType === "on_site") {
+                    entryDate.value = getTodayDateString();
+                }
                 if (!hasGitHubWriteAccess()) {
-                    setEntryStatus("保存需 GitHub Token，请先点「Token」设置", "error");
+                    setEntryStatus("请先在上方保存 GitHub Token", "error");
                 }
                 entryDate.focus({ preventScroll: true });
             }
@@ -455,7 +442,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 .catch(function(error) {
                     setEntryStatus(error.message, "error");
                     if (!hasGitHubWriteAccess()) {
-                        openTokenDialog();
+                        focusTokenInput();
                     }
                 })
                 .finally(function() {
