@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>年度工作时间统计</title>
-    <link rel="stylesheet" href="styles.css?v=7">
+    <link rel="stylesheet" href="styles.css?v=16">
 </head>
 <body>
     <div class="container">
@@ -47,36 +47,51 @@
                 </div>
             </div>
             <div class="calendar-footer">
-                <div id="statsContainer" class="stats-container"></div>
-                <div class="manual-entry-section">
+                <div class="calendar-footer-row">
+                    <div id="statsContainer" class="stats-container"></div>
                     <button type="button" id="manualEntryToggle" class="manual-entry-btn" aria-expanded="false">手动录入</button>
-                    <div class="manual-entry-panel-slot">
-                        <div id="manualEntryPanel" class="manual-entry-panel" hidden>
-                        <label class="entry-field">
-                            <span>日期</span>
-                            <input type="date" id="entryDate" required>
-                        </label>
-                        <label class="entry-field">
-                            <span>类型</span>
-                            <div class="entry-type-group" role="radiogroup" aria-label="录入类型">
-                                <button type="button" class="entry-type-btn active" data-type="leave">请假 (17h)</button>
-                                <button type="button" class="entry-type-btn" data-type="business_trip">出差 (16h)</button>
-                                <button type="button" class="entry-type-btn" data-type="on_site">现场服务 (8.75h)</button>
-                            </div>
-                        </label>
-                        <label class="entry-field entry-field-remark">
-                            <span>备注</span>
-                            <input type="text" id="entryRemark" placeholder="可选，如地点或姓名">
-                        </label>
-                        <button type="button" id="entrySubmit" class="entry-submit-btn">保存</button>
-                        <span id="entryStatus" class="entry-status" role="status"></span>
+                </div>
+                <div class="manual-entry-panel-slot">
+                    <div id="manualEntryPanel" class="manual-entry-panel" hidden>
+                    <label class="entry-field">
+                        <span>日期</span>
+                        <input type="date" id="entryDate" required>
+                    </label>
+                    <label class="entry-field">
+                        <span>类型</span>
+                        <div class="entry-type-group" role="radiogroup" aria-label="录入类型">
+                            <button type="button" class="entry-type-btn active" data-type="leave">请假 (17h)</button>
+                            <button type="button" class="entry-type-btn" data-type="business_trip">出差 (16h)</button>
+                            <button type="button" class="entry-type-btn" data-type="on_site">现场服务</button>
                         </div>
+                    </label>
+                    <div id="onSiteFields" class="on-site-fields" hidden>
+                        <label class="entry-field">
+                            <span>开机时间</span>
+                            <input type="time" id="entryStartTime" step="1" value="08:30:00">
+                        </label>
+                        <label class="entry-field">
+                            <span>关机时间</span>
+                            <input type="time" id="entryEndTime" step="1" value="17:31:00">
+                        </label>
+                        <label class="entry-field">
+                            <span>使用时间</span>
+                            <input type="text" id="entryHours" readonly tabindex="-1">
+                        </label>
+                    </div>
+                    <label class="entry-field entry-field-remark">
+                        <span>备注</span>
+                        <input type="text" id="entryRemark" placeholder="可选，如地点或姓名">
+                    </label>
+                    <button type="button" id="entrySubmit" class="entry-submit-btn">保存</button>
+                    <span id="entryStatus" class="entry-status" role="status"></span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="tooltip" id="tooltip"></div>
     </div>
-    <script src="script.js?v=6"></script>
+    <script src="github-config.js" onerror="window.GITHUB_CONFIG=null"></script>
+    <script src="script.js?v=15"></script>
 </body>
 </html>
