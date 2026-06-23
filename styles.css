@@ -600,11 +600,12 @@ body {
     padding-top: 40px;
 }
 
-.year-selector,
-.stats-container {
+.year-selector {
     position: absolute;
     top: 10px;
+    left: 10px;
     padding: 4px 8px;
+    padding-right: 20px;
     font-size: 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -612,11 +613,6 @@ body {
     color: #333;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
-}
-
-.year-selector {
-    left: 10px;
-    padding-right: 20px;
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -663,17 +659,53 @@ body {
     margin-top: 16px;
     padding-top: 12px;
     border-top: 1px solid #eee;
+    width: 100%;
+}
+
+.calendar-footer-row {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
     gap: 12px;
+    width: 100%;
+}
+
+.manual-entry-panel-slot {
+    position: relative;
+    width: 100%;
+    min-height: 150px;
+    margin-top: 10px;
+}
+
+.on-site-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.on-site-fields[hidden] {
+    display: none;
+}
+
+.on-site-fields .entry-field input[readonly] {
+    width: 72px;
+    background-color: #f5f5f5;
+    color: #333;
+    cursor: default;
 }
 
 .calendar-footer .stats-container {
-    position: static;
+    position: static !important;
     top: auto;
     left: auto;
     right: auto;
+    flex: 1;
+    min-width: 0;
     padding: 0;
+    font-size: 12px;
+    color: #309f46 !important;
     background-color: transparent;
     border: none;
     box-shadow: none;
@@ -683,43 +715,32 @@ body {
     text-overflow: unset;
 }
 
-.manual-entry-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
-    width: 100%;
-}
-
-.manual-entry-panel-slot {
-    position: relative;
-    width: 100%;
-    min-height: 108px;
-}
-
 .manual-entry-btn {
     flex-shrink: 0;
+    margin-left: auto;
     white-space: nowrap;
-    padding: 4px 10px;
+    padding: 4px 8px;
     font-size: 12px;
-    border: 1px solid #4CAF50;
+    font-family: Arial, sans-serif;
+    border: 1px solid #ccc;
     border-radius: 4px;
-    background-color: #eef7ee;
-    color: #2e7d32;
+    background-color: #f8f8f8;
+    color: #333;
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    line-height: normal;
 }
 
 .manual-entry-btn:hover {
-    background-color: #e0f2e0;
-    border-color: #43a047;
+    background-color: #f0f0f0;
+    border-color: #999;
 }
 
 .manual-entry-btn[aria-expanded="true"] {
-    border-color: #4CAF50;
-    color: #2e7d32;
-    background-color: #eef7ee;
+    border-color: #999;
+    background-color: #f0f0f0;
+    color: #333;
 }
 
 .manual-entry-panel {
@@ -738,7 +759,7 @@ body {
     border-radius: 6px;
     background-color: #fafafa;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: opacity 0.15s ease;
+    z-index: 5;
 }
 
 .manual-entry-panel[hidden] {
@@ -835,7 +856,20 @@ body {
 
 @media (max-width: 768px) {
     .manual-entry-panel-slot {
-        min-height: 220px;
+        min-height: 200px;
+    }
+
+    .on-site-fields {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .calendar-footer-row {
+        flex-wrap: wrap;
+    }
+
+    .manual-entry-btn {
+        margin-left: auto;
     }
 
     .manual-entry-panel {
@@ -846,7 +880,7 @@ body {
     .entry-field {
         width: 100%;
     }
-                
+
     .entry-field input,
     .entry-field select {
         flex: 1;
