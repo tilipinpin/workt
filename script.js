@@ -652,10 +652,74 @@ document.addEventListener("DOMContentLoaded", function() {
         legendBusinessTrip.querySelector('.days-over-16-text').textContent = `(${daysOver16Hours} days)`;
     }
 
-    function updateMonthLabels(startDate, selectedYear) {
+   function updateMonthLabels(startDate, selectedYear) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         monthLabelsState = { startDate: new Date(startDate), selectedYear: selectedYear };
 
+        const updateLabels = () => {
+            if (!monthLabelsState) {
+                return;
+            }
+
+            monthsContainer.innerHTML = '';
+            
+            // 【核心修复】：判断当前是否为手机窄屏环境（小于768px）
+            // 如果是手机竖屏，直接使用我们在 CSS 中硬性指定的 850px 作为计算基准，防止 DOM 未加载完成时抓取 offsetWidth 错误。
+            let containerWidth = weeksContainer.offsetWidth;
+            if (window.innerWidth <= 768) {
+                containerWidth = 850; // 严格与移动端日历最小宽度对齐
+            }
+
+            if (!containerWidth) {
+                return;
+            }
+
+            // 计算每一个星期格子的实际跨度
+            const squareWidth = containerWidth / 53;
+            
+            // 手机端微调左侧起始偏移量（如果是手机端，由于星期标签缩小，偏移做相应微调）
+            const labelOffset = window.innerWidth <= 768 ? 14 : 25; 
+            const topOffset = 10;
+
+            let currentDate = new Date(monthLabelsState.startDate);
+            currentDate.setDate(currentDate.getDate() - currentDate.getDay());
+
+            let lastMonth = -1;
+
+            for (let i = 0; i < 53; i++) {
+                const monthIndex = currentDate.getMonth();
+                if (monthIndex !== lastMonth) {
+                    const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
+                    const daysSinceMonthStart = Math.floor((currentDate - firstDayOfMonth) / (24 * 60 * 60 * 1000));
+
+                    if (daysSinceMonthStart < 14 || (monthLabelsState.selectedYear === 2023 && i === 0)) {
+                        const monthDiv = document.createElement('div');
+                        monthDiv.textContent = months[monthIndex];
+                        monthDiv.style.left = (i * squareWidth + labelOffset) + 'px';
+                        monthDiv.style.top = topOffset + 'px';
+                        monthDiv.style.position = 'absolute';
+                        monthsContainer.appendChild(monthDiv);
+                        lastMonth = monthIndex;
+                    }
+                }
+                currentDate.setDate(currentDate.getDate() + 7);
+            }
+        };
+
+        const scheduleUpdateLabels = () => {
+            requestAnimationFrame(function() {
+                requestAnimationFrame(updateLabels);
+            });
+        };
+
+        if (monthLabelsResizeHandler) {
+            window.removeEventListener('resize', monthLabelsResizeHandler);
+        }
+
+        monthLabelsResizeHandler = scheduleUpdateLabels;
+        scheduleUpdateLabels();
+        window.addEventListener('resize', monthLabelsResizeHandler);
+    }
         const updateLabels = () => {
             if (!monthLabelsState) {
                 return;
