@@ -981,3 +981,100 @@ body {
         flex: 1;
     }
 }
+/* 针对手机移动端（屏幕宽度小于 768px）的整套优化方案 */
+@media (max-width: 768px) {
+    
+    /* 1. 强制禁用移动端转屏或缩放时的字体自动放大 */
+    html, body {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    /* 2. 让外层容器支持横向滚动，包裹日历 */
+    .container {
+        width: 100%;
+        overflow-x: auto;            /* 允许水平滚动 */
+        -webkit-overflow-scrolling: touch; /* 丝滑滚动体验 */
+        padding-bottom: 15px;
+    }
+
+    /* 3. 给日历主体写死一个宽度，确保格子不会被挤扁，静静等待滚动 */
+    .calendar {
+        min-width: 800px;            /* 根据格子多少可微调，通常800px足够 */
+        box-sizing: border-box;
+    }
+
+    /* 4. 重点修改：录入面板插槽与面板本身 */
+    .manual-entry-panel-slot {
+        /* 让录入面板脱离日历的超宽限制，钉在手机屏幕的可视范围内 */
+        position: sticky;
+        left: 0;
+        width: 100vw;               /* 宽度等于手机屏幕宽度 */
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .manual-entry-panel {
+        width: 100% !important;     /* 覆盖可能写死的固定宽度 */
+        max-width: 100% !important;
+        box-sizing: border-box;
+        padding: 15px 10px;         /* 适当缩减手机端的内边距 */
+    }
+
+    /* 5. 内部表单项转为垂直堆叠，防止横向撑开屏幕 */
+    .entry-field {
+        display: block !important;  /* 放弃横向排列 */
+        width: 100% !important;
+        margin-bottom: 12px;
+    }
+
+    .entry-field span {
+        display: block;
+        margin-bottom: 5px;         /* 让标签文本在输入框上方显示 */
+    }
+
+    .entry-field input[type="text"],
+    .entry-field input[type="password"],
+    .entry-field input[type="date"],
+    .entry-field input[type="time"] {
+        width: 100% !important;     /* 输入框撑满整行 */
+        box-sizing: border-box;
+    }
+
+    /* 6. GitHub Token 区域的特殊处理（防变大、自适应） */
+    .entry-token-section {
+        -webkit-text-size-adjust: none !important;
+        text-size-adjust: none !important;
+    }
+    
+    .entry-field-token {
+        display: flex !important;   /* Token栏如果带有保存清除按钮，在手机上允许折行 */
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .entry-field-token input {
+        width: 100% !important;
+    }
+
+    /* 7. 类型选择按钮组自适应 */
+    .entry-type-group {
+        display: flex !important;
+        flex-wrap: wrap;            /* 空间不够时自动折行 */
+        gap: 8px;
+    }
+    
+    .entry-type-btn {
+        flex: 1 1 calc(33.33% - 8px); /* 按钮平分空间 */
+        min-width: 90px;            /* 防止字太密集 */
+        text-align: center;
+        padding: 8px 4px;
+    }
+
+    /* 8. 现场服务开机时间那一行 */
+    .on-site-fields {
+        display: flex !important;
+        flex-direction: column;     /* 手机上三个框垂直叠放 */
+        gap: 10px;
+    }
+}
