@@ -1,4 +1,17 @@
+/* 针对全局或特定区域禁用移动端浏览器的字体自动放大 */
+html, body {
+    -webkit-text-size-adjust: 100%; /* 针对 iOS Safari 和 Android Chrome */
+    -moz-text-size-adjust: 100%;    /* 针对 Firefox Mobile */
+    text-size-adjust: 100%;         /* 标准属性 */
+}
 
+/* 如果只想精准控制 GitHub Token 这一块区域，也可以加在对应的面板或输入框上 */
+.entry-token-section, 
+.entry-field-token, 
+.entry-token-status {
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
+}
 body {
     font-family: Arial, sans-serif;
     display: flex;
