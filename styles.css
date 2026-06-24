@@ -1003,7 +1003,27 @@ body {
         min-width: 800px;            /* 根据格子多少可微调，通常800px足够 */
         box-sizing: border-box;
     }
+   /* 核心补丁：确保月份栏、星期栏和内容区的宽度与日历主体完全一致 */
+    .months,
+    .content,
+    .weeks {
+        width: 100% !important;
+        min-width: 800px !important; /* 这里的像素值必须与你上面给 .calendar 设置的 min-width 完全一致 */
+        box-sizing: border-box;
+    }
 
+    /* 如果你的布局中 .content 使用了 flex，确保它在移动端不要换行，紧密排列 */
+    .content {
+        display: flex !important;
+        flex-direction: row !important; /* 确保星期和格子是横向并排的 */
+        align-items: flex-start;
+    }
+
+    /* 确保月份的格子容器也是横向撑开 */
+    .months {
+        display: flex !important;
+        justify-content: space-between; /* 或者根据你原本的布局方式排列 */
+    }
     /* 4. 重点修改：录入面板插槽与面板本身 */
     .manual-entry-panel-slot {
         /* 让录入面板脱离日历的超宽限制，钉在手机屏幕的可视范围内 */
