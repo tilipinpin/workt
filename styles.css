@@ -982,119 +982,155 @@ body {
     }
 }
 /* 针对手机移动端（屏幕宽度小于 768px）的整套优化方案 */
+/* ==========================================
+   统一的移动端响应式优化方案（完全保留原本月份对齐逻辑）
+   ========================================== */
 @media (max-width: 768px) {
     
     /* 1. 强制禁用移动端转屏或缩放时的字体自动放大 */
     html, body {
-        -webkit-text-size-adjust: 100%;
-        text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100% !important;
+        text-size-adjust: 100% !important;
     }
 
-    /* 2. 让外层容器支持横向滚动，包裹日历 */
+    /* 2. 让外层最根本的容器支持横向滚动，彻底包裹日历 */
     .container {
-        width: 100%;
-        overflow-x: auto;            /* 允许水平滚动 */
-        -webkit-overflow-scrolling: touch; /* 丝滑滚动体验 */
-        padding-bottom: 15px;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        overflow-x: auto !important;          /* 开启水平滚动 */
+        -webkit-overflow-scrolling: touch;   /* 确保 iOS 滑动丝滑 */
+        padding: 10px !important;
+        box-sizing: border-box !important;
     }
 
-    /* 3. 给日历主体写死一个宽度，确保格子不会被挤扁，静静等待滚动 */
+    /* 3. 让日历主体撑开足够的固定宽度，维持 PC 端的完美格子形态 */
     .calendar {
-        min-width: 800px;            /* 根据格子多少可微调，通常800px足够 */
-        box-sizing: border-box;
+        min-width: 850px !important;          /* 确保有足够的横向空间排开53周 */
+        width: 850px !important;
+        padding-top: 20px !important;
+        box-sizing: border-box !important;
     }
-   /* 核心补丁：确保月份栏、星期栏和内容区的宽度与日历主体完全一致 */
+
+    /* 4. 核心修复：让月份、星期、格子区域的总宽完美同步 */
     .months,
     .content,
     .weeks {
         width: 100% !important;
-        min-width: 800px !important; /* 这里的像素值必须与你上面给 .calendar 设置的 min-width 完全一致 */
-        box-sizing: border-box;
+        min-width: 850px !important;         /* 必须与 .calendar 的宽度完全一致 */
+        box-sizing: border-box !important;
     }
 
-    /* 如果你的布局中 .content 使用了 flex，确保它在移动端不要换行，紧密排列 */
-    .content {
-        display: flex !important;
-        flex-direction: row !important; /* 确保星期和格子是横向并排的 */
-        align-items: flex-start;
+    /* ⚠️ 关键点：移除我们上一步手动加的百分比，
+       让原本 JS 动态计算的绝对定位（position: absolute）在 850px 的基准下完美复活 */
+    .months div {
+        font-size: 10px !important;           /* 手机端稍微缩小一点月份字号 */
     }
 
-    /* 确保月份的格子容器也是横向撑开 */
-    .months {
-        display: flex !important;
-        justify-content: space-between; /* 或者根据你原本的布局方式排列 */
+    .weekdays div {
+        font-size: 10px !important;
     }
-    /* 4. 重点修改：录入面板插槽与面板本身 */
+    
+    .day, .legend-square {
+        width: 9px !important;
+        height: 9px !important;
+    }
+
+    /* 5. 图例区域保持横向并排滚动 */
+    .legend {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        padding-left: 25px !important;
+        font-size: 11px !important;
+        width: 100% !important;
+        min-width: 850px !important;
+    }
+
+    /* 6. 底部统计结果与录入面板：利用黏性定位钉在手机可见视口内，实现自适应 */
+    .calendar-footer {
+        position: sticky !important;         /* 关键：不随日历格子滑走 */
+        left: 0 !important;
+        width: calc(100vw - 20px) !important; /* 强制宽度等于手机屏幕可视宽度 */
+        box-sizing: border-box !important;
+    }
+    
+    .calendar-footer-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+
+    /* 7. 手动录入面板表单在手机上完美垂直堆叠 */
     .manual-entry-panel-slot {
-        /* 让录入面板脱离日历的超宽限制，钉在手机屏幕的可视范围内 */
-        position: sticky;
-        left: 0;
-        width: 100vw;               /* 宽度等于手机屏幕宽度 */
-        max-width: 100%;
-        box-sizing: border-box;
+        width: 100% !important;
+        min-height: auto !important;
     }
 
     .manual-entry-panel {
-        width: 100% !important;     /* 覆盖可能写死的固定宽度 */
-        max-width: 100% !important;
-        box-sizing: border-box;
-        padding: 15px 10px;         /* 适当缩减手机端的内边距 */
-    }
-
-    /* 5. 内部表单项转为垂直堆叠，防止横向撑开屏幕 */
-    .entry-field {
-        display: block !important;  /* 放弃横向排列 */
+        position: relative !important;       
         width: 100% !important;
-        margin-bottom: 12px;
+        max-width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;   /* 全部变为单列垂直排列 */
+        align-items: stretch !important;
+        gap: 12px !important;
+        padding: 12px !important;
+        box-sizing: border-box !important;
+    }
+    
+    .manual-entry-panel[hidden] {
+        display: none !important;
     }
 
-    .entry-field span {
-        display: block;
-        margin-bottom: 5px;         /* 让标签文本在输入框上方显示 */
+    .entry-field {
+        display: flex !important;
+        flex-direction: column !important;   /* 文字标签在输入框上方 */
+        align-items: flex-start !important;
+        width: 100% !important;
+        gap: 4px !important;
+    }
+    
+    .entry-field input, .entry-field-token input {
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
-    .entry-field input[type="text"],
-    .entry-field input[type="password"],
-    .entry-field input[type="date"],
-    .entry-field input[type="time"] {
-        width: 100% !important;     /* 输入框撑满整行 */
-        box-sizing: border-box;
-    }
-
-    /* 6. GitHub Token 区域的特殊处理（防变大、自适应） */
     .entry-token-section {
-        -webkit-text-size-adjust: none !important;
-        text-size-adjust: none !important;
+        width: 100% !important;
     }
     
     .entry-field-token {
-        display: flex !important;   /* Token栏如果带有保存清除按钮，在手机上允许折行 */
-        flex-direction: column;
-        gap: 8px;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
     }
     
-    .entry-field-token input {
-        width: 100% !important;
-    }
-
-    /* 7. 类型选择按钮组自适应 */
     .entry-type-group {
-        display: flex !important;
-        flex-wrap: wrap;            /* 空间不够时自动折行 */
-        gap: 8px;
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important; /* 三列平分按钮 */
+        gap: 6px !important;
     }
     
     .entry-type-btn {
-        flex: 1 1 calc(33.33% - 8px); /* 按钮平分空间 */
-        min-width: 90px;            /* 防止字太密集 */
-        text-align: center;
-        padding: 8px 4px;
+        width: 100% !important;
+        padding: 6px 2px !important;
+        font-size: 11px !important;
     }
 
-    /* 8. 现场服务开机时间那一行 */
     .on-site-fields {
         display: flex !important;
-        flex-direction: column;     /* 手机上三个框垂直叠放 */
-        gap: 10px;
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 8px !important;
+    }
+    
+    .entry-submit-btn {
+        width: 100% !important;              /* 保存按钮撑满，方便按压 */
+        padding: 8px !important;
+        font-size: 14px !important;
     }
 }
+   
