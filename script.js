@@ -400,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const expanded = manualEntryToggle.getAttribute("aria-expanded") === "true";
             manualEntryToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
             manualEntryPanel.hidden = expanded;
-            if (!expanded) {if (!expanded) {
+            if (!expanded){
     // ===== 每次打开默认切换为"现场服务" =====
     entryTypeButtons.forEach(function(item) {
         item.classList.remove("active");
