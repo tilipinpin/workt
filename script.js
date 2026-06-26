@@ -400,15 +400,36 @@ document.addEventListener("DOMContentLoaded", function() {
             const expanded = manualEntryToggle.getAttribute("aria-expanded") === "true";
             manualEntryToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
             manualEntryPanel.hidden = expanded;
-            if (!expanded) {
-                if (selectedEntryType === "on_site") {
-                    entryDate.value = getTodayDateString();
-                }
-                if (!hasGitHubWriteAccess()) {
-                    setEntryStatus("请先在上方保存 GitHub Token", "error");
-                }
-                entryDate.focus({ preventScroll: true });
-            }
+            if (!expanded) {if (!expanded) {
+    // ===== 每次打开默认切换为"现场服务" =====
+    entryTypeButtons.forEach(function(item) {
+        item.classList.remove("active");
+    });
+
+    const defaultBtn = document.querySelector('.entry-type-btn[data-type="on_site"]');
+    if (defaultBtn) {
+        defaultBtn.classList.add("active");
+    }
+
+    updateEntryTypeUI("on_site");
+
+    // 默认当天日期
+    entryDate.value = getTodayDateString();
+
+    // 清空备注
+    entryRemark.value = "";
+
+    // 重置现场服务时间
+    resetOnSiteFields();
+
+    if (!hasGitHubWriteAccess()) {
+        setEntryStatus("请先在上方保存 GitHub Token", "error");
+    } else {
+        setEntryStatus("", "");
+    }
+
+    entryDate.focus({ preventScroll: true });
+}
         });
 
         entrySubmit.addEventListener("click", function() {
