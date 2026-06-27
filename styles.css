@@ -2041,9 +2041,11 @@ body {
     }
 
     /* 8. 现场服务开机时间那一行 */
-    .on-site-fields {
-        display: flex !important;
-        flex-direction: column;     /* 手机上三个框垂直叠放 */
-        gap: 10px;
-    }
+    .on-site-fields:not([hidden]) {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+}
+.on-site-fields[hidden] {
+    display: none !important;
 }
