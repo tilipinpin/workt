@@ -683,13 +683,12 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             monthsContainer.innerHTML = '';
-            const containerWidth = weeksContainer.offsetWidth;
-            if (!containerWidth) {
+            const weekElements = Array.from(weeksContainer.querySelectorAll('.week'));
+            if (!weekElements.length) {
                 return;
             }
 
-            const squareWidth = containerWidth / 53;
-            const labelOffset = 25;
+            calendar.style.setProperty('--calendar-grid-offset', weekElements[0].offsetLeft + 'px');
             const topOffset = 10;
 
             let currentDate = new Date(monthLabelsState.startDate);
@@ -697,7 +696,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             let lastMonth = -1;
 
-            for (let i = 0; i < 53; i++) {
+            for (let i = 0; i < weekElements.length; i++) {
                 const monthIndex = currentDate.getMonth();
                 if (monthIndex !== lastMonth) {
                     const firstDayOfMonth = new Date(currentDate.getFullYear(), monthIndex, 1);
@@ -706,7 +705,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (daysSinceMonthStart < 14 || (monthLabelsState.selectedYear === 2023 && i === 0)) {
                         const monthDiv = document.createElement('div');
                         monthDiv.textContent = months[monthIndex];
-                        monthDiv.style.left = (i * squareWidth + labelOffset) + 'px';
+                        monthDiv.style.left = weekElements[i].offsetLeft + 'px';
                         monthDiv.style.top = topOffset + 'px';
                         monthDiv.style.position = 'absolute';
                         monthsContainer.appendChild(monthDiv);
