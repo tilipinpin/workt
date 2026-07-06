@@ -2049,3 +2049,32 @@ body {
 .on-site-fields[hidden] {
     display: none !important;
 }
+
+.calendar {
+    --calendar-grid-offset: 25px;
+}
+
+.legend,
+.calendar-footer {
+    box-sizing: border-box;
+    width: calc(100% - var(--calendar-grid-offset));
+    margin-left: var(--calendar-grid-offset);
+    padding-left: 0;
+}
+
+.calendar-footer-row,
+.manual-entry-panel-slot {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .legend,
+    .calendar-footer {
+        padding-left: 0;
+    }
+
+    .calendar-footer .manual-entry-panel-slot {
+        width: 100%;
+        max-width: 100%;
+    }
+}
