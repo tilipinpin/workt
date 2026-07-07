@@ -722,3 +722,66 @@ body {
         flex: 1;
     }
 }
+/* 针对手机端（竖屏）的响应式修复 */
+@media screen and (max-width: 480px) {
+    
+    /* 1. 修复录入面板本身的定位和宽度 */
+    .manual-entry-panel {
+        width: 92% !important;       /* 让面板宽度占屏幕的 92%，两边留空 */
+        max-width: 100% !important;
+        box-sizing: border-box !important; /* 确保 padding 不会额外撑大位置 */
+        
+        /* 重置可能存在的绝对定位导致的向左偏移 */
+        position: relative !important; 
+        left: 0 !important;
+        right: 0 !important;
+        transform: none !important;
+        margin: 15px auto !important; /* 靠外层容器自动居中 */
+    }
+
+    /* 2. 彻底解决 GitHub Token 这一行太长的问题 */
+    .entry-field-token {
+        display: flex !important;
+        flex-direction: column !important; /* 变横排为竖排 */
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+
+    /* 让 Token 输入框在手机上变宽，占满一行 */
+    .entry-field-token input {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 如果保存和清除按钮想在同一行，可以给它们套个并排样式，或者直接让它们都独占一行 */
+    .entry-token-save-btn,
+    .entry-token-clear-btn {
+        width: 100% !important;
+        margin-left: 0 !important; /* 清除可能存在的左边距 */
+    }
+
+    /* 3. 修复类型选择按钮（请假/出差/现场服务）在窄屏下的排列 */
+    .entry-type-group {
+        display: flex !important;
+        flex-wrap: wrap !important; /* 允许按钮换行 */
+        gap: 6px !important;
+    }
+
+    .entry-type-btn {
+        flex: 1 1 calc(50% - 6px); /* 一行排两个，自动平分 */
+        font-size: 13px !important; /* 稍微缩小手机端字号防止挤爆 */
+        padding: 6px 4px !important;
+        text-align: center;
+    }
+
+    /* 4. 修复开机/关机/使用时间在同一行过挤的问题 */
+    .on-site-fields {
+        display: flex !important;
+        flex-direction: column !important; /* 手机端改为上下堆叠 */
+        gap: 10px !important;
+    }
+    
+    .on-site-fields .entry-field {
+        width: 100% !important;
+    }
+}
