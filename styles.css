@@ -2,12 +2,9 @@
    1. 全局与基础布局 (Global & Base Layout)
    ========================================================================== */
 html, body {
-    -webkit-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%; /* 禁用移动端浏览器自动放大字体 */
     -moz-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    width: 100%;
-    /* 核心修改：禁止整个网页级别出现横向滚动条，防止整体内容错位 */
-    overflow-x: hidden; 
 }
 
 body {
@@ -15,20 +12,15 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    min-height: 100vh;
+    height: 100vh;
     margin: 0;
     padding: 0;
     background-color: #ffffff;
-    width: 100%;
 }
 
-/* 统一限制最外层容器，在手机端绝不撑破屏幕 */
 .container {
-    width: 100%;
-    max-width: 1200px;
-    padding: 20px 16px 0 16px; /* 预留左右内边距，确保内容不贴边 */
-    margin: 10px auto 0 auto;
-    box-sizing: border-box;
+    padding-top: 20px;
+    margin-top: 10px; /* 整体内容下移 */
 }
 
 /* ==========================================================================
@@ -39,19 +31,14 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
+    max-width: 1200px;
     padding-top: 40px;
-    box-sizing: border-box;
 }
 
-/* 核心滚动容器：只允许日历主体在这里面横向滚动 */
 .content {
     display: flex;
     flex-wrap: nowrap;
-    width: 100%;
-    overflow-x: auto;          /* 允许局部水平滚动 */
-    -webkit-overflow-scrolling: touch; /* 优化 iOS 手机滑动的流畅度 */
-    box-sizing: border-box;
-    padding-bottom: 5px;       /* 留出滚动条空间，防止遮挡方格 */
+    overflow-x: auto; /* 允许水平滚动 */
 }
 
 /* 月份标签 */
@@ -76,7 +63,6 @@ body {
     justify-content: space-between;
     padding-top: 0px;
     margin-right: 5px;
-    flex-shrink: 0; /* 核心修改：星期标签绝对不能被压缩 */
 }
 
 .weekdays div {
@@ -90,14 +76,13 @@ body {
 /* 日期网格组合 */
 .weeks {
     display: flex;
+    flex-grow: 1;
     flex-wrap: nowrap;
-    flex-shrink: 0; /* 核心修改：53周的网格绝对不能被压缩，必须维持原宽以供滚动 */
 }
 
 .week {
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
 }
 
 /* 单个日期方格 */
@@ -108,7 +93,6 @@ body {
     background-color: #ebeaf0;
     border-radius: 1.5px;
     position: relative;
-    flex-shrink: 0;
 }
 
 /* 不同层级的活跃度颜色 */
@@ -117,7 +101,7 @@ body {
 .day[data-level="3"] { background-color: #309f46; }
 .day[data-level="4"] { background-color: #1b662a; }
 .day[data-level="5"] { background-color: #a5b029; text-align: left; }
-.day[data-level="6"] { background-color: #f30606; }
+.day[data-level="6"] { background-color: #f30606; } /* 请假/异常 */
 
 .day.future {
     visibility: hidden;
@@ -152,7 +136,7 @@ body {
 .year-selector {
     position: absolute;
     top: 10px;
-    left: 0; /* 改为0，对齐容器边界 */
+    left: 10px;
     padding: 4px 20px 4px 8px;
     font-size: 12px;
     border: 1px solid #ccc;
@@ -173,6 +157,54 @@ body {
     z-index: 2;
 }
 
+.year-selector:hover {
+    background-color: #f0f0f0;
+    border-color: #999;
+}
+
+.year-selector:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76,175,80,0.2);
+}
+
+.year-selector option {
+    padding: 6px;
+    background-color: #fff;
+    color: #333;
+}
+
+.year-selector option[value="recent"] {
+    font-size: 11px;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+/* 年份切换项额外交互（适用于卡片式设计的.year类） */
+.year {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.year.selected::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background-color: green;
+    border-radius: 0 0 3px 3px;
+}
+
+.year:hover::after {
+    content: none;
+}
+
+.year:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+}
+
 /* ==========================================================================
    4. 图例与统计区域 (Legend & Statistics)
    ========================================================================== */
@@ -180,7 +212,6 @@ body {
     display: flex;
     align-items: center;
     margin-top: 10px;
-    width: 100%;
 }
 
 .legend {
@@ -190,11 +221,12 @@ body {
     margin-top: 10px;
     font-size: 12px;
     color: #242323;
-    width: 100%;
-    box-sizing: border-box;
-    padding-left: 30px; 
+    white-space: nowrap;
+    overflow-x: auto;
+    padding-left: 30px; /* 与第一列方格对齐 */
 }
 
+/* 各图例基础结构 */
 .legend-business-trip,
 .legend-leave,
 .legend-overtime,
@@ -205,23 +237,27 @@ body {
 }
 
 .legend-business-trip,
-.legend-leave,
+.legend-leave {
+    margin-right: 40px;
+}
+
 .legend-overtime {
     margin-right: 40px;
 }
 
+/* 图例小方块基础样式 */
 .legend-square {
     width: 10px;
     height: 10px;
     border-radius: 1.5px;
     margin-right: 5px;
-    flex-shrink: 0;
 }
 
 .legend-business-trip .legend-square { margin-right: 3px; }
 .legend-leave .legend-square         { background-color: #f30606; }
 .legend-overtime .legend-square      { background-color: #1b662a; }
 
+/* 基础 Level 颜色映射（Main 渐变图例） */
 .legend-squares {
     display: flex;
     margin: 0 3px;
@@ -236,6 +272,7 @@ body {
 .legend-square[data-level="4"] { background-color: #1b662a; }
 .legend-square[data-level="5"] { background-color: #a5b029; }
 
+/* 统计数据排版与文字颜色 */
 .stats-container {
     font-size: 12px;
     color: #309f46 !important;
@@ -247,15 +284,29 @@ body {
     color: inherit !important;
 }
 
-.days-over-16-text, .days-over-17-text, .business-trip-text, .overtime-text {
+/* 精准文本色值控制 */
+.days-over-16-text,
+.days-over-17-text,
+.business-trip-text,
+.overtime-text {
     font-size: 12px;
 }
-.hours-text { font-size: 1em; color: #309f46; }
-.overtime-text { color: #000000; }
-.days-over-16-text { color: #1b662a; }
-.business-trip-text { color: #050505; }
-.business-trip-text .days-over-16-text { color: #a5b029; }
-.days-over-17-text { font-size: 1em; color: #f30606; }
+
+.hours-text {
+    font-size: 1em;
+    color: #309f46;
+}
+
+.overtime-text { color: #000000; }               /* 加班标签：黑色 */
+.days-over-16-text { color: #1b662a; }           /* 加班天数：深绿 */
+
+.business-trip-text { color: #050505; }          /* 出差标签：深灰 */
+.business-trip-text .days-over-16-text { color: #a5b029; } /* 出差天数：橄榄绿 */
+
+.days-over-17-text {
+    font-size: 1em;
+    color: #f30606; /* 请假统计：红色 */
+}
 
 /* ==========================================================================
    5. 底部手动录入面板 (Calendar Footer & Manual Entry)
@@ -265,18 +316,17 @@ body {
     padding-top: 12px;
     border-top: 1px solid #eee;
     width: 100%;
-    box-sizing: border-box;
 }
 
 .calendar-footer-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 12px;
     width: 100%;
-    box-sizing: border-box;
 }
 
+/* 将底部的统计重置为标准流 */
 .calendar-footer .stats-container {
     position: static !important;
     flex: 1;
@@ -297,6 +347,7 @@ body {
     white-space: nowrap;
     padding: 4px 8px;
     font-size: 12px;
+    font-family: Arial, sans-serif;
     border: 1px solid #ccc;
     border-radius: 4px;
     background-color: #f8f8f8;
@@ -304,6 +355,14 @@ body {
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    line-height: normal;
+}
+
+.manual-entry-btn:hover,
+.manual-entry-btn[aria-expanded="true"] {
+    background-color: #f0f0f0;
+    border-color: #999;
+    color: #333;
 }
 
 .manual-entry-panel-slot {
@@ -330,6 +389,7 @@ body {
     z-index: 5;
 }
 
+/* 隐藏状态下的过渡处理 */
 .manual-entry-panel[hidden] {
     display: flex !important;
     visibility: hidden;
@@ -337,17 +397,26 @@ body {
     pointer-events: none;
 }
 
+/* Token 配置区块 */
 .entry-token-section {
     width: 100%;
     padding-bottom: 8px;
     margin-bottom: 4px;
     border-bottom: 1px solid #e8e8e8;
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
+}
+
+.entry-token-section.token-configured {
+    border-bottom-color: #c8e6c9;
 }
 
 .entry-field-token {
     display: flex;
     flex-wrap: wrap;
     width: 100%;
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
 }
 
 .entry-field-token input {
@@ -355,7 +424,8 @@ body {
     min-width: 140px;
 }
 
-.entry-token-save-btn, .entry-token-clear-btn {
+.entry-token-save-btn,
+.entry-token-clear-btn {
     padding: 4px 10px;
     font-size: 12px;
     border: 1px solid #ccc;
@@ -363,32 +433,109 @@ body {
     background-color: #fff;
     color: #333;
     cursor: pointer;
+    white-space: nowrap;
 }
 
-.entry-token-save-btn { border-color: #4CAF50; background-color: #4CAF50; color: #fff; }
-.on-site-fields { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; width: 100%; }
+.entry-token-save-btn {
+    border-color: #4CAF50;
+    background-color: #4CAF50;
+    color: #fff;
+}
+
+.entry-token-save-btn:hover { background-color: #43a047; }
+.entry-token-clear-btn:hover { border-color: #999; background-color: #f0f0f0; }
+
+.entry-token-status {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #666;
+    min-height: 1.2em;
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
+}
+.entry-token-status.success { color: #2e7d32; }
+.entry-token-status.error   { color: #c62828; }
+
+/* 表单通用字段 */
+.on-site-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
 .on-site-fields[hidden] { display: none; }
-.entry-field { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #333; }
-.entry-field input { padding: 4px 8px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; }
-.on-site-fields .entry-field input[readonly] { width: 72px; background-color: #f5f5f5; }
-.entry-type-group { display: flex; flex-wrap: wrap; gap: 6px; }
-.entry-type-btn { padding: 4px 10px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; cursor: pointer; }
+
+.entry-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #333;
+}
+.entry-field span { white-space: nowrap; }
+.entry-field input {
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+}
+.on-site-fields .entry-field input[readonly] {
+    width: 72px;
+    background-color: #f5f5f5;
+    color: #333;
+    cursor: default;
+}
+
+.entry-type-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.entry-type-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.entry-type-btn:hover { border-color: #4CAF50; color: #2e7d32; }
 .entry-type-btn.active { border-color: #4CAF50; background-color: #4CAF50; color: #fff; }
+
 .entry-field-remark input { min-width: 160px; }
-.entry-submit-btn { margin-left: auto; padding: 4px 12px; font-size: 12px; border: 1px solid #4CAF50; border-radius: 4px; background-color: #4CAF50; color: #fff; cursor: pointer; }
+
+.entry-submit-btn {
+    margin-left: auto;
+    padding: 4px 12px;
+    font-size: 12px;
+    border: 1px solid #4CAF50;
+    border-radius: 4px;
+    background-color: #4CAF50;
+    color: #fff;
+    cursor: pointer;
+}
+.entry-submit-btn:hover { background-color: #43a047; }
+.entry-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.entry-status { font-size: 12px; color: #666; }
+.entry-status.success { color: #2e7d32; }
+.entry-status.error   { color: #c62828; }
 
 /* ==========================================================================
    6. 统一响应式断点设计 (Responsive Mobile Design < 768px)
    ========================================================================== */
 @media (max-width: 768px) {
-    /* 核心安全保障：移动端强制锁死整体视图宽度，消灭全屏乱飘 */
-    .container, .calendar, .legend-container {
-        width: 100% !important;
-        max-width: 100vw !important;
-        overflow-x: hidden !important; /* 顶层禁止横向滚动 */
-    }
-
-    .day, .legend-square {
+    /* 基础尺寸缩减 */
+    .day, 
+    .legend-square, 
+    .legend-leave .legend-square, 
+    .legend-overtime .legend-square {
         width: 8px;
         height: 8px;
     }
@@ -396,69 +543,74 @@ body {
     .months { margin-bottom: 10px; }
     .months div { font-size: 10px; }
 
+    /* 侧边星期标签调整 */
     .weekdays {
         flex-direction: column;
         justify-content: flex-start;
-        margin-right: 2px;
-        padding-top: 2px;
+        margin-right: 1px;
+        padding-top: 5px;
     }
     .weekdays div {
         height: auto;
         font-size: 10px;
-        margin-top: 1px;
-        margin-bottom: 2px;
+        margin-top: 2px;
+        margin-bottom: 3px;
         text-align: center;
     }
 
+    /* 选择器与文本字体缩放 */
     .year-selector {
         font-size: 12px;
         padding: 3px 18px 3px 6px;
         background-size: 14px;
     }
+    .year-selector option[value="recent"] {
+        font-size: 12px; /* 修复了原先冲突的 2px/9px 破坏性样式，统一为 12px 确保移动端可读 */
+    }
+    .year {
+        font-size: 10px;
+        padding: 2px;
+    }
 
-    /* 图例行：在屏幕可见100%宽内自动换行并两端对齐，不触发横向滚动 */
+    /* 图例移动端流式多行布局 */
     .legend {
         font-size: 10px;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
-        overflow-x: hidden;
-        white-space: normal;
-        padding-left: 0px; 
-        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-left: 25px;
     }
-    
     .legend-business-trip,
     .legend-leave,
     .legend-overtime {
-        margin-right: 0px;
-        margin-bottom: 6px;
+        margin-right: 3px;
+        margin-bottom: 0;
     }
-    
     .legend-main {
         width: auto;
-        margin-right: 0px;
+        margin-right: 3px;
     }
-    .legend-main .legend-square { margin-right: 1px; }
-
-    /* 底部统计与录入按钮行：完美卡在屏幕两侧 */
-    .calendar-footer {
-        padding-left: 0px;
-        padding-right: 0px;
-        width: 100%;
+    .legend-main .legend-square {
+        margin-right: 1px;
+    }
+    .legend-main span,
+    .days-over-16-text,
+    .days-over-17-text,
+    .business-trip-text,
+    .overtime-text,
+    .business-trip-text .days-over-16-text {
+        font-size: 10px;
     }
 
+    /* 录入面板移动端堆叠弹性布局 */
     .calendar-footer-row {
-        flex-wrap: nowrap;
-        justify-content: space-between;
-        width: 100%;
+        flex-wrap: wrap;
     }
-    
     .manual-entry-btn {
-        margin-left: 0;
+        margin-left: auto;
     }
-
-    /* 手动录入表单面板：移动端自适应向下单列铺开 */
     .manual-entry-panel-slot {
         min-height: 240px;
     }
@@ -470,9 +622,22 @@ body {
         flex-direction: column;
         align-items: stretch;
     }
-    .entry-field-token input { width: 100%; }
-    .entry-token-save-btn, .entry-token-clear-btn { flex: 1; }
-    .on-site-fields { flex-direction: column; align-items: stretch; }
-    .entry-field { width: 100%; }
-    .entry-field input, .entry-field select { flex: 1; }
+    .entry-field-token input {
+        width: 100%;
+    }
+    .entry-token-save-btn,
+    .entry-token-clear-btn {
+        flex: 1;
+    }
+    .on-site-fields {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .entry-field {
+        width: 100%;
+    }
+    .entry-field input,
+    .entry-field select {
+        flex: 1;
+    }
 }
