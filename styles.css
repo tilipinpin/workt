@@ -1,643 +1,270 @@
-/* ==========================================================================
-   1. 全局与基础布局 (Global & Base Layout)
-   ========================================================================== */
-html, body {
-    -webkit-text-size-adjust: 100%; /* 禁用移动端浏览器自动放大字体 */
-    -moz-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+/* ================= 1. 全局重置与基础样式 ================= */
+* {
+    box-sizing: border-box; /* 核心：防止 padding 和 border 撑破屏幕宽度 */
 }
 
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #ffffff;
+    color: #333;
+    /* 核心：取消强制居中，防止左侧溢出被截断 */
+    display: block; 
+    overflow-x: hidden; 
 }
 
 .container {
-    padding-top: 20px;
-    margin-top: 10px; /* 整体内容下移 */
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 15px;
+    width: 100%;
 }
 
-/* ==========================================================================
-   2. 日历核心组件 (Calendar Core)
-   ========================================================================== */
-.calendar {
-    position: relative;
+.year-selector {
+    padding: 5px 10px;
+    font-size: 14px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #d0d7de;
+}
+
+/* ================= 2. 图表横向滑动区 ================= */
+.calendar-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* 提升 iOS 上的滑动顺滑度 */
+    padding-bottom: 15px; 
+    margin-bottom: 10px;
+}
+
+.calendar-scroll-inner {
+    min-width: 780px; /* 锁定最小宽度，保证月份和方格绝对对齐，不被挤压 */
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 1200px;
-    padding-top: 40px;
+}
+
+.months {
+    display: flex;
+    margin-bottom: 5px;
+    margin-left: 35px; /* 留出左侧星期标签(Mon/Wed/Fri)的宽度 */
+    font-size: 12px;
+    color: #57606a;
+}
+
+.months span {
+    flex: 1; 
 }
 
 .content {
     display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto; /* 允许水平滚动 */
+    align-items: flex-start;
 }
 
-/* 月份标签 */
-.months {
-    position: relative;
-    height: 20px;
-    margin-bottom: 5px;
-}
-
-.months div {
-    position: absolute;
-    font-size: 12px;
-    font-weight: normal;
-    color: #050505;
-    white-space: nowrap;
-}
-
-/* 星期标签 */
 .weekdays {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    padding-top: 0px;
-    margin-right: 5px;
+    gap: 4px;
+    margin-right: 8px;
+    font-size: 12px;
+    color: #57606a;
+    width: 27px;
+    text-align: right;
 }
 
 .weekdays div {
-    height: 13px;
-    font-size: 12px;
-    color: #050505;
-    margin-top: -1.5px;
-    margin-bottom: 1px;
+    height: 14px; 
+    line-height: 14px;
 }
 
-/* 日期网格组合 */
 .weeks {
     display: flex;
-    flex-grow: 1;
-    flex-wrap: nowrap;
+    gap: 4px; 
 }
 
 .week {
     display: flex;
     flex-direction: column;
+    gap: 4px; 
 }
 
-/* 单个日期方格 */
-.day {
-    width: 10px;
-    height: 10px;
-    margin: 1.5px;
-    background-color: #ebeaf0;
-    border-radius: 1.5px;
-    position: relative;
+/* 方格默认样式 */
+.legend-square, .day {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    background-color: #ebedf0; 
 }
 
-/* 不同层级的活跃度颜色 */
-.day[data-level="1"] { background-color: #c6e48b; }
-.day[data-level="2"] { background-color: #74c967; }
-.day[data-level="3"] { background-color: #309f46; }
-.day[data-level="4"] { background-color: #1b662a; }
-.day[data-level="5"] { background-color: #a5b029; text-align: left; }
-.day[data-level="6"] { background-color: #f30606; } /* 请假/异常 */
+/* 方格颜色定义 (根据 data-level) */
+[data-level="1"], .day[data-level="1"] { background-color: #9be9a8; }
+[data-level="2"], .day[data-level="2"] { background-color: #40c463; }
+[data-level="3"], .day[data-level="3"] { background-color: #30a14e; }
+[data-level="4"], .day[data-level="4"] { background-color: #216e39; }
+[data-level="5"], .day[data-level="5"] { background-color: #a4ce00; } /* 出差 */
+[data-level="6"], .day[data-level="6"] { background-color: #cf222e; } /* 请假 */
 
-.day.future {
-    visibility: hidden;
-}
 
-.no-data {
-    background-color: #f0f0f0;
-    opacity: 0.5;
-}
-
-/* 工具提示 */
-.tooltip {
-    position: absolute;
-    background-color: #333;
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
-    opacity: 0;
-    pointer-events: none;
-    font-size: 12px;
-    transition: opacity 0.3s;
-    z-index: 1000;
-}
-
-.tooltip.show {
-    opacity: 1;
-}
-
-/* ==========================================================================
-   3. 年份选择器 (Year Selector)
-   ========================================================================== */
-.year-selector {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 4px 20px 4px 8px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-    color: #333;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    outline: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 5px top 50%;
-    background-size: 16px;
-    z-index: 2;
-}
-
-.year-selector:hover {
-    background-color: #f0f0f0;
-    border-color: #999;
-}
-
-.year-selector:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76,175,80,0.2);
-}
-
-.year-selector option {
-    padding: 6px;
-    background-color: #fff;
-    color: #333;
-}
-
-.year-selector option[value="recent"] {
-    font-size: 11px;
-    font-weight: bold;
-    color: #4CAF50;
-}
-
-/* 年份切换项额外交互（适用于卡片式设计的.year类） */
-.year {
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.year.selected::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background-color: green;
-    border-radius: 0 0 3px 3px;
-}
-
-.year:hover::after {
-    content: none;
-}
-
-.year:hover {
-    background-color: #f0f0f0;
-    transform: scale(1.05);
-}
-
-/* ==========================================================================
-   4. 图例与统计区域 (Legend & Statistics)
-   ========================================================================== */
-.legend-container {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-}
-
+/* ================= 3. 底部图例、统计与操作区 ================= */
 .legend {
     display: flex;
+    flex-wrap: wrap; /* 自动折行，防止手机端超宽 */
     align-items: center;
     justify-content: space-between;
-    margin-top: 10px;
+    gap: 10px;
     font-size: 12px;
-    color: #242323;
-    white-space: nowrap;
-    overflow-x: auto;
-    padding-left: 30px; /* 与第一列方格对齐 */
+    color: #57606a;
+    padding-top: 10px;
+    border-top: 1px solid #eaecef;
 }
 
-/* 各图例基础结构 */
-.legend-business-trip,
-.legend-leave,
-.legend-overtime,
-.legend-main {
+.legend > div {
     display: flex;
     align-items: center;
-    flex-shrink: 0;
+    gap: 5px;
 }
 
-.legend-business-trip,
-.legend-leave {
-    margin-right: 40px;
-}
-
-.legend-overtime {
-    margin-right: 40px;
-}
-
-/* 图例小方块基础样式 */
-.legend-square {
-    width: 10px;
-    height: 10px;
-    border-radius: 1.5px;
-    margin-right: 5px;
-}
-
-.legend-business-trip .legend-square { margin-right: 3px; }
-.legend-leave .legend-square         { background-color: #f30606; }
-.legend-overtime .legend-square      { background-color: #1b662a; }
-
-/* 基础 Level 颜色映射（Main 渐变图例） */
 .legend-squares {
     display: flex;
-    margin: 0 3px;
-    flex-shrink: 0;
+    gap: 4px;
+    margin: 0 5px;
 }
 
-.legend-squares .legend-square { margin: 0 1px; }
-.legend-square[data-level="0"] { background-color: #ebeaf0; }
-.legend-square[data-level="1"] { background-color: #c6e48b; }
-.legend-square[data-level="2"] { background-color: #74c967; }
-.legend-square[data-level="3"] { background-color: #309f46; }
-.legend-square[data-level="4"] { background-color: #1b662a; }
-.legend-square[data-level="5"] { background-color: #a5b029; }
-
-/* 统计数据排版与文字颜色 */
-.stats-container {
-    font-size: 12px;
-    color: #309f46 !important;
-}
-
-.stats-container span {
-    display: inline-block;
-    margin-right: 5px;
-    color: inherit !important;
-}
-
-/* 精准文本色值控制 */
-.days-over-16-text,
-.days-over-17-text,
-.business-trip-text,
-.overtime-text {
-    font-size: 12px;
-}
-
-.hours-text {
-    font-size: 1em;
-    color: #309f46;
-}
-
-.overtime-text { color: #000000; }               /* 加班标签：黑色 */
-.days-over-16-text { color: #1b662a; }           /* 加班天数：深绿 */
-
-.business-trip-text { color: #050505; }          /* 出差标签：深灰 */
-.business-trip-text .days-over-16-text { color: #a5b029; } /* 出差天数：橄榄绿 */
-
-.days-over-17-text {
-    font-size: 1em;
-    color: #f30606; /* 请假统计：红色 */
-}
-
-/* ==========================================================================
-   5. 底部手动录入面板 (Calendar Footer & Manual Entry)
-   ========================================================================== */
 .calendar-footer {
-    margin-top: 16px;
-    padding-top: 12px;
-    border-top: 1px solid #eee;
+    margin-top: 20px;
     width: 100%;
 }
 
 .calendar-footer-row {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
-    width: 100%;
+    flex-wrap: wrap; 
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-/* 将底部的统计重置为标准流 */
-.calendar-footer .stats-container {
-    position: static !important;
-    flex: 1;
-    min-width: 0;
-    padding: 0;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    z-index: auto;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: unset;
+.stats-container {
+    font-size: 14px;
+    color: #2da44e;
+    font-weight: 500;
 }
 
 .manual-entry-btn {
-    flex-shrink: 0;
-    margin-left: auto;
-    white-space: nowrap;
-    padding: 4px 8px;
-    font-size: 12px;
-    font-family: Arial, sans-serif;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-    color: #333;
+    padding: 6px 12px;
+    background-color: #2da44e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    line-height: normal;
 }
 
-.manual-entry-btn:hover,
-.manual-entry-btn[aria-expanded="true"] {
-    background-color: #f0f0f0;
-    border-color: #999;
-    color: #333;
-}
-
+/* ================= 4. 手动录入面板 ================= */
 .manual-entry-panel-slot {
-    position: relative;
     width: 100%;
-    min-height: 190px;
-    margin-top: 10px;
 }
 
 .manual-entry-panel {
-    position: absolute;
-    top: 0; left: 0; right: 0;
     width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
     border-radius: 6px;
-    background-color: #fafafa;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    z-index: 5;
+    padding: 15px;
+    margin-top: 10px;
+    overflow-wrap: break-word; /* 防止内部长文本撑破容器 */
 }
-
-/* 隐藏状态下的过渡处理 */
-.manual-entry-panel[hidden] {
-    display: flex !important;
-    visibility: hidden;
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Token 配置区块 */
-.entry-token-section {
-    width: 100%;
-    padding-bottom: 8px;
-    margin-bottom: 4px;
-    border-bottom: 1px solid #e8e8e8;
-    -webkit-text-size-adjust: none !important;
-    text-size-adjust: none !important;
-}
-
-.entry-token-section.token-configured {
-    border-bottom-color: #c8e6c9;
-}
-
-.entry-field-token {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    -webkit-text-size-adjust: none !important;
-    text-size-adjust: none !important;
-}
-
-.entry-field-token input {
-    flex: 1;
-    min-width: 140px;
-}
-
-.entry-token-save-btn,
-.entry-token-clear-btn {
-    padding: 4px 10px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #fff;
-    color: #333;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.entry-token-save-btn {
-    border-color: #4CAF50;
-    background-color: #4CAF50;
-    color: #fff;
-}
-
-.entry-token-save-btn:hover { background-color: #43a047; }
-.entry-token-clear-btn:hover { border-color: #999; background-color: #f0f0f0; }
-
-.entry-token-status {
-    display: block;
-    margin-top: 4px;
-    font-size: 11px;
-    color: #666;
-    min-height: 1.2em;
-    -webkit-text-size-adjust: none !important;
-    text-size-adjust: none !important;
-}
-.entry-token-status.success { color: #2e7d32; }
-.entry-token-status.error   { color: #c62828; }
-
-/* 表单通用字段 */
-.on-site-fields {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-}
-.on-site-fields[hidden] { display: none; }
 
 .entry-field {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #333;
+    display: block;
+    margin-bottom: 12px;
+    width: 100%;
 }
-.entry-field span { white-space: nowrap; }
-.entry-field input {
-    padding: 4px 8px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #fff;
+
+.entry-field > span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #24292f;
 }
-.on-site-fields .entry-field input[readonly] {
-    width: 72px;
-    background-color: #f5f5f5;
-    color: #333;
-    cursor: default;
+
+/* 输入框统一宽度控制 */
+.entry-field input[type="date"],
+.entry-field input[type="time"],
+.entry-field input[type="text"],
+.entry-field input[type="password"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #ffffff;
 }
 
 .entry-type-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
+    width: 100%;
 }
 
 .entry-type-btn {
-    padding: 4px 10px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #fff;
-    color: #333;
+    flex: 1;
+    min-width: 80px;
+    padding: 8px;
+    border: 1px solid #d0d7de;
+    background: #ffffff;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    font-size: 13px;
 }
-.entry-type-btn:hover { border-color: #4CAF50; color: #2e7d32; }
-.entry-type-btn.active { border-color: #4CAF50; background-color: #4CAF50; color: #fff; }
 
-.entry-field-remark input { min-width: 160px; }
+.entry-type-btn.active {
+    background-color: #2da44e;
+    color: white;
+    border-color: #2da44e;
+}
 
+.entry-token-section {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eaecef;
+}
+
+.entry-token-save-btn,
+.entry-token-clear-btn,
 .entry-submit-btn {
-    margin-left: auto;
-    padding: 4px 12px;
-    font-size: 12px;
-    border: 1px solid #4CAF50;
-    border-radius: 4px;
-    background-color: #4CAF50;
-    color: #fff;
+    width: 100%; 
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
     cursor: pointer;
+    font-weight: 500;
 }
-.entry-submit-btn:hover { background-color: #43a047; }
-.entry-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.entry-status { font-size: 12px; color: #666; }
-.entry-status.success { color: #2e7d32; }
-.entry-status.error   { color: #c62828; }
+.entry-submit-btn, .entry-token-save-btn {
+    background-color: #2da44e;
+    color: white;
+}
 
-/* ==========================================================================
-   6. 统一响应式断点设计 (Responsive Mobile Design < 768px)
-   ========================================================================== */
-@media (max-width: 768px) {
-    /* 基础尺寸缩减 */
-    .day, 
-    .legend-square, 
-    .legend-leave .legend-square, 
-    .legend-overtime .legend-square {
-        width: 8px;
-        height: 8px;
-    }
+.entry-token-clear-btn {
+    background-color: #cf222e;
+    color: white;
+}
 
-    .months { margin-bottom: 10px; }
-    .months div { font-size: 10px; }
-
-    /* 侧边星期标签调整 */
-    .weekdays {
-        flex-direction: column;
-        justify-content: flex-start;
-        margin-right: 1px;
-        padding-top: 5px;
-    }
-    .weekdays div {
-        height: auto;
-        font-size: 10px;
-        margin-top: 2px;
-        margin-bottom: 3px;
-        text-align: center;
-    }
-
-    /* 选择器与文本字体缩放 */
-    .year-selector {
-        font-size: 12px;
-        padding: 3px 18px 3px 6px;
-        background-size: 14px;
-    }
-    .year-selector option[value="recent"] {
-        font-size: 12px; /* 修复了原先冲突的 2px/9px 破坏性样式，统一为 12px 确保移动端可读 */
-    }
-    .year {
-        font-size: 10px;
-        padding: 2px;
-    }
-
-    /* 图例移动端流式多行布局 */
-    .legend {
-        font-size: 10px;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-left: 25px;
-    }
-    .legend-business-trip,
-    .legend-leave,
-    .legend-overtime {
-        margin-right: 3px;
-        margin-bottom: 0;
-    }
-    .legend-main {
-        width: auto;
-        margin-right: 3px;
-    }
-    .legend-main .legend-square {
-        margin-right: 1px;
-    }
-    .legend-main span,
-    .days-over-16-text,
-    .days-over-17-text,
-    .business-trip-text,
-    .overtime-text,
-    .business-trip-text .days-over-16-text {
-        font-size: 10px;
-    }
-
-    /* 录入面板移动端堆叠弹性布局 */
-    .calendar-footer-row {
-        flex-wrap: wrap;
-    }
-    .manual-entry-btn {
-        margin-left: auto;
-    }
-    .manual-entry-panel-slot {
-        min-height: 240px;
-    }
-    .manual-entry-panel {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .entry-field-token {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .entry-field-token input {
-        width: 100%;
-    }
-    .entry-token-save-btn,
-    .entry-token-clear-btn {
-        flex: 1;
-    }
-    .on-site-fields {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .entry-field {
-        width: 100%;
-    }
-    .entry-field input,
-    .entry-field select {
-        flex: 1;
-    }
+/* Tooltip 样式 */
+.tooltip {
+    position: absolute;
+    background: rgba(36, 41, 47, 0.9);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 100;
 }
