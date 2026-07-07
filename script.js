@@ -312,7 +312,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // 与 Python 脚本相同：GET 文件 SHA → 修改 CSV → PUT 回 GitHub
     function saveEntryViaGitHub(date, type, remark, details) {
         const config = getGitHubConfig();
         if (!config) {
@@ -401,35 +400,27 @@ document.addEventListener("DOMContentLoaded", function() {
             manualEntryToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
             manualEntryPanel.hidden = expanded;
             if (!expanded){
-    // ===== 每次打开默认切换为"现场服务" =====
-    entryTypeButtons.forEach(function(item) {
-        item.classList.remove("active");
-    });
+                entryTypeButtons.forEach(function(item) {
+                    item.classList.remove("active");
+                });
 
-    const defaultBtn = document.querySelector('.entry-type-btn[data-type="on_site"]');
-    if (defaultBtn) {
-        defaultBtn.classList.add("active");
-    }
+                const defaultBtn = document.querySelector('.entry-type-btn[data-type="on_site"]');
+                if (defaultBtn) {
+                    defaultBtn.classList.add("active");
+                }
 
-    updateEntryTypeUI("on_site");
+                updateEntryTypeUI("on_site");
+                entryDate.value = getTodayDateString();
+                entryRemark.value = "";
+                resetOnSiteFields();
 
-    // 默认当天日期
-    entryDate.value = getTodayDateString();
-
-    // 清空备注
-    entryRemark.value = "";
-
-    // 重置现场服务时间
-    resetOnSiteFields();
-
-    if (!hasGitHubWriteAccess()) {
-        setEntryStatus("请先在上方保存 GitHub Token", "error");
-    } else {
-        setEntryStatus("", "");
-    }
-
-    entryDate.focus({ preventScroll: true });
-}
+                if (!hasGitHubWriteAccess()) {
+                    setEntryStatus("请先在上方保存 GitHub Token", "error");
+                } else {
+                    setEntryStatus("", "");
+                }
+                entryDate.focus({ preventScroll: true });
+            }
         });
 
         entrySubmit.addEventListener("click", function() {
@@ -475,7 +466,6 @@ document.addEventListener("DOMContentLoaded", function() {
     initTokenSettings();
     initManualEntry();
 
-    // 生成年份选择器
     function generateYearSelector() {
         const currentYear = new Date().getFullYear();
         for (let i = 1; i < 10; i++) {
@@ -489,7 +479,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     generateYearSelector();
 
-    // 年份选择事件
     yearSelector.addEventListener('change', function() {
         const selectedValue = this.value;
         if (selectedValue === 'recent') {
@@ -500,7 +489,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // 数据加载逻辑
     function loadUsageData(forceReload) {
         function applyData(data) {
             parseUsageCsv(data);
@@ -529,7 +517,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         let startDate, endDate;
         const today = new Date();
-        today.setHours(today.getHours() + 8); // 调整为中国时区
+        today.setHours(today.getHours() + 8); 
 
         if (isYearSelected && selectedYear) {
             startDate = new Date(selectedYear, 0, 1);
@@ -559,14 +547,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 const year = currentDate.getFullYear();
                 const usage = usageData[year] && usageData[year][dateString] ? usageData[year][dateString] : { hours: 0, startTime: '', endTime: '', address: '' };
 
-                // 只生成属于选定年份的日期方格
                 if (isYearSelected && year !== selectedYear) {
-                    dayDiv.classList.add("future"); // 不属于选中年份的方格
+                    dayDiv.classList.add("future"); 
                 } else if (currentDate > today) {
-                    // 不生成今天之后的方格
-                    dayDiv.classList.add("future"); // 可以选择添加样式以标识
+                    dayDiv.classList.add("future"); 
                 } else {
-                    // 设置颜色等级和属性
                     let level = 0;
                     if (usage.hours > 0) level = 1;
                     if (usage.hours > 4) level = 2;
@@ -582,7 +567,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     dayDiv.setAttribute("data-end-time", usage.endTime);
                     dayDiv.setAttribute("data-address", usage.address);
 
-                    // 统计逻辑
                     if (usage.hours > 0) {
                         if (usage.hours < 16) {
                             yearTotalDays++;
@@ -606,7 +590,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                 }
 
-                // 工具提示功能
                 dayDiv.addEventListener("mouseenter", function() {
                     const usage = this.getAttribute("data-usage");
                     const date = this.getAttribute("data-date");
@@ -631,7 +614,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
 
                 weekDiv.appendChild(dayDiv);
-                currentDate.setDate(currentDate.getDate() + 1); // 生成下一天
+                currentDate.setDate(currentDate.getDate() + 1); 
             }
 
             weeksContainer.appendChild(weekDiv);
@@ -649,7 +632,6 @@ document.addEventListener("DOMContentLoaded", function() {
             "<span>" + days + " working days in " + displayYear + "</span>" +
             "<span class=\"hours-text\">(" + hours.toFixed(1) + " hours)</span>";
 
-        // 更新加班统计图例
         let legendOvertime = document.querySelector('.legend-overtime');
         if (!legendOvertime) {
             legendOvertime = document.createElement('div');
@@ -658,21 +640,21 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div class="legend-square"></div>
                 <span class="overtime-text">Work Overtime <span class="days-over-16-text">(0 days)</span></span>
             `;
-            // 将加班图例插入到请假图例之前
             const legendLeave = document.querySelector('.legend-leave');
             legendLeave.parentNode.insertBefore(legendOvertime, legendLeave);
         }
         legendOvertime.querySelector('.days-over-16-text').textContent = `(${overtimeDays} days)`;
 
-        // 更新假假图例
         const legendLeave = document.querySelector('.legend-leave');
         legendLeave.querySelector('.days-over-17-text').textContent = `(${daysOver17Hours} days)`;
 
-        // 更新出差图例
         const legendBusinessTrip = document.querySelector('.legend-business-trip');
         legendBusinessTrip.querySelector('.days-over-16-text').textContent = `(${daysOver16Hours} days)`;
     }
 
+    /* ==========================================
+       修复点：updateMonthLabels 函数
+       ========================================== */
     function updateMonthLabels(startDate, selectedYear) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         monthLabelsState = { startDate: new Date(startDate), selectedYear: selectedYear };
@@ -687,9 +669,10 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!weekElements.length) {
                 return;
             }
-
-            calendar.style.setProperty('--calendar-grid-offset', weekElements[0].offsetLeft + 'px');
-            const topOffset = 10;
+            
+            // 核心修复 1：强制锁定相对定位和基准高度，防止被内部绝对定位的子元素撑破或塌陷
+            monthsContainer.style.position = 'relative';
+            monthsContainer.style.minHeight = '18px'; 
 
             let currentDate = new Date(monthLabelsState.startDate);
             currentDate.setDate(currentDate.getDate() - currentDate.getDay());
@@ -706,7 +689,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         const monthDiv = document.createElement('div');
                         monthDiv.textContent = months[monthIndex];
                         monthDiv.style.left = weekElements[i].offsetLeft + 'px';
-                        monthDiv.style.top = topOffset + 'px';
+                        // 核心修复 2：使用 bottom: 0 贴底定位，替换掉原先容易溢出的 top: 10px
+                        monthDiv.style.bottom = '0px'; 
                         monthDiv.style.position = 'absolute';
                         monthsContainer.appendChild(monthDiv);
                         lastMonth = monthIndex;
@@ -733,13 +717,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function scheduleNextUpdate() {
         const now = new Date();
-        now.setHours(now.getHours() + 8); // 调整为中国时区
+        now.setHours(now.getHours() + 8); 
         const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
         tomorrow.setHours(8, 0, 0, 0);
         const timeUntilMidnight = tomorrow - now;
 
         setTimeout(function() {
-            console.log("执行午夜更新"); // 添加日志
+            console.log("执行午夜更新"); 
             loadUsageData(true).then(function() {
                 refreshCalendar();
                 scheduleNextUpdate();
@@ -747,7 +731,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }, timeUntilMidnight);
     }
 
-    // 初始加载数据并开始定时更新
     loadUsageData().then(() => {
         if (!calendarGenerated) {
             yearSelector.value = 'recent';
