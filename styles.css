@@ -1,7 +1,5 @@
 /* ================= 1. 全局重置与基础样式 ================= */
-* {
-    box-sizing: border-box; /* 核心：防止 padding 和 border 撑破屏幕宽度 */
-}
+* { box-sizing: border-box; }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -9,9 +7,7 @@ body {
     padding: 0;
     background-color: #ffffff;
     color: #333;
-    /* 核心：取消强制居中，防止左侧溢出被截断 */
-    display: block; 
-    overflow-x: hidden; 
+    overflow-x: hidden;
 }
 
 .container {
@@ -21,44 +17,46 @@ body {
     width: 100%;
 }
 
-.year-selector {
-    padding: 5px 10px;
-    font-size: 14px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    border: 1px solid #d0d7de;
-}
-
-/* ================= 2. 图表横向滑动区 ================= */
+/* ================= 2. 核心：日历横向滑动区优化 ================= */
 .calendar-scroll-wrapper {
     width: 100%;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* 提升 iOS 上的滑动顺滑度 */
-    padding-bottom: 15px; 
-    margin-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+    padding-top: 30px; /* 必须：为顶部月份标签预留空间 */
+    padding-bottom: 15px;
+    position: relative;
 }
 
 .calendar-scroll-inner {
-    min-width: 780px; /* 锁定最小宽度，保证月份和方格绝对对齐，不被挤压 */
+    min-width: 780px; 
     display: flex;
     flex-direction: column;
+    position: relative; /* 为月份标签的 absolute 定位提供基准 */
 }
 
+/* 优化月份标签：固定高度防止塌陷，使用绝对定位 */
 .months {
+    position: absolute;
+    top: 0;
+    left: 35px; /* 对应 weekdays 的宽度 */
+    right: 0;
+    height: 25px;
     display: flex;
-    margin-bottom: 5px;
-    margin-left: 35px; /* 留出左侧星期标签(Mon/Wed/Fri)的宽度 */
-    font-size: 12px;
-    color: #57606a;
+    white-space: nowrap;
 }
 
 .months span {
-    flex: 1; 
+    position: absolute; /* JS 会动态设置 left 值 */
+    font-size: 12px;
+    color: #57606a;
+    pointer-events: none;
 }
 
+/* 日历主体内容 */
 .content {
     display: flex;
     align-items: flex-start;
+    margin-top: 5px;
 }
 
 .weekdays {
@@ -70,192 +68,78 @@ body {
     color: #57606a;
     width: 27px;
     text-align: right;
-}
-
-.weekdays div {
-    height: 14px; 
-    line-height: 14px;
+    flex-shrink: 0;
 }
 
 .weeks {
     display: flex;
-    gap: 4px; 
+    gap: 4px;
 }
 
 .week {
     display: flex;
     flex-direction: column;
-    gap: 4px; 
+    gap: 4px;
+    flex-shrink: 0; /* 防止宽度被压缩 */
 }
 
-/* 方格默认样式 */
-.legend-square, .day {
+/* 方格样式 */
+.day {
     width: 14px;
     height: 14px;
     border-radius: 2px;
-    background-color: #ebedf0; 
+    background-color: #ebedf0;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-/* 方格颜色定义 (根据 data-level) */
-[data-level="1"], .day[data-level="1"] { background-color: #9be9a8; }
-[data-level="2"], .day[data-level="2"] { background-color: #40c463; }
-[data-level="3"], .day[data-level="3"] { background-color: #30a14e; }
-[data-level="4"], .day[data-level="4"] { background-color: #216e39; }
-[data-level="5"], .day[data-level="5"] { background-color: #a4ce00; } /* 出差 */
-[data-level="6"], .day[data-level="6"] { background-color: #cf222e; } /* 请假 */
+[data-level="1"] { background-color: #9be9a8; }
+[data-level="2"] { background-color: #40c463; }
+[data-level="3"] { background-color: #30a14e; }
+[data-level="4"] { background-color: #216e39; }
+[data-level="5"] { background-color: #a4ce00; }
+[data-level="6"] { background-color: #cf222e; }
 
-
-/* ================= 3. 底部图例、统计与操作区 ================= */
+/* ================= 3. 底部图例与操作区 ================= */
 .legend {
     display: flex;
-    flex-wrap: wrap; /* 自动折行，防止手机端超宽 */
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
     font-size: 12px;
     color: #57606a;
-    padding-top: 10px;
-    border-top: 1px solid #eaecef;
-}
-
-.legend > div {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.legend-squares {
-    display: flex;
-    gap: 4px;
-    margin: 0 5px;
-}
-
-.calendar-footer {
-    margin-top: 20px;
-    width: 100%;
+    padding: 10px 0;
 }
 
 .calendar-footer-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 10px;
-}
-
-.stats-container {
-    font-size: 14px;
-    color: #2da44e;
-    font-weight: 500;
-}
-
-.manual-entry-btn {
-    padding: 6px 12px;
-    background-color: #2da44e;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
+    margin-top: 10px;
 }
 
 /* ================= 4. 手动录入面板 ================= */
-.manual-entry-panel-slot {
-    width: 100%;
-}
-
 .manual-entry-panel {
-    width: 100%;
     background: #f6f8fa;
     border: 1px solid #d0d7de;
     border-radius: 6px;
     padding: 15px;
-    margin-top: 10px;
-    overflow-wrap: break-word; /* 防止内部长文本撑破容器 */
+    margin-top: 15px;
 }
 
-.entry-field {
-    display: block;
-    margin-bottom: 12px;
-    width: 100%;
-}
+.entry-field { display: block; margin-bottom: 12px; }
+.entry-field span { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+.entry-field input { width: 100%; padding: 8px; border: 1px solid #d0d7de; border-radius: 6px; }
 
-.entry-field > span {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #24292f;
-}
+.entry-type-group { display: flex; gap: 8px; }
+.entry-type-btn { flex: 1; padding: 8px; border: 1px solid #d0d7de; background: #fff; border-radius: 6px; cursor: pointer; }
+.entry-type-btn.active { background-color: #2da44e; color: #fff; border-color: #2da44e; }
 
-/* 输入框统一宽度控制 */
-.entry-field input[type="date"],
-.entry-field input[type="time"],
-.entry-field input[type="text"],
-.entry-field input[type="password"] {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    font-size: 14px;
-    background-color: #ffffff;
-}
+.entry-submit-btn { width: 100%; padding: 10px; background-color: #2da44e; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
 
-.entry-type-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    width: 100%;
-}
-
-.entry-type-btn {
-    flex: 1;
-    min-width: 80px;
-    padding: 8px;
-    border: 1px solid #d0d7de;
-    background: #ffffff;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-}
-
-.entry-type-btn.active {
-    background-color: #2da44e;
-    color: white;
-    border-color: #2da44e;
-}
-
-.entry-token-section {
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eaecef;
-}
-
-.entry-token-save-btn,
-.entry-token-clear-btn,
-.entry-submit-btn {
-    width: 100%; 
-    padding: 10px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.entry-submit-btn, .entry-token-save-btn {
-    background-color: #2da44e;
-    color: white;
-}
-
-.entry-token-clear-btn {
-    background-color: #cf222e;
-    color: white;
-}
-
-/* Tooltip 样式 */
+/* Tooltip */
 .tooltip {
     position: absolute;
     background: rgba(36, 41, 47, 0.9);
@@ -264,7 +148,5 @@ body {
     border-radius: 6px;
     font-size: 12px;
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s;
     z-index: 100;
 }
