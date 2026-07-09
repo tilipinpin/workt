@@ -902,7 +902,7 @@ html, body {
         display: grid !important;
         grid-template-columns: max-content max-content;
         justify-content: start !important;
-        column-gap: 36px;
+        column-gap: 48px;
         row-gap: 4px;
         box-sizing: border-box;
         width: calc(100% - var(--calendar-grid-offset)) !important;
