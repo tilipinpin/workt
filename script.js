@@ -23,8 +23,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const GITHUB_REPO = "tilipinpin/workt";
     const GITHUB_FILE_PATH = "date/usage_data.csv";
-    const GITHUB_RAW_URL = "https://raw.githubusercontent.com/" + GITHUB_REPO + "/main/" + GITHUB_FILE_PATH;
-    const DATA_URL = GITHUB_RAW_URL;
+    
+    // ==========================================
+    // 优化：读取使用 jsDelivr CDN 完美避免 429 限流
+    // ==========================================
+    const DATA_URL = "https://cdn.jsdelivr.net/gh/" + GITHUB_REPO + "@main/" + GITHUB_FILE_PATH;
     const TOKEN_STORAGE_KEY = "workt_github_token";
 
     const ENTRY_TYPES = {
@@ -39,11 +42,10 @@ document.addEventListener("DOMContentLoaded", function() {
     let monthLabelsState = null;
 
     // ==========================================
-    // 新增：中国时区标准时间获取助手函数
+    // 标准中国时区时间获取函数
     // ==========================================
     function getChinaNow() {
         const now = new Date();
-        // 利用 Intl 转换出中国时区的具体年月日时分秒数
         const formatter = new Intl.DateTimeFormat("zh-CN", {
             timeZone: "Asia/Shanghai",
             year: "numeric", month: "numeric", day: "numeric",
@@ -53,7 +55,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const parts = formatter.formatToParts(now);
         const map = {};
         parts.forEach(p => map[p.type] = p.value);
-        // 返回一个基于中国时区数值构建的本地 Date 对象
         return new Date(map.year, map.month - 1, map.day, map.hour, map.minute, map.second);
     }
 
@@ -147,7 +148,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function getTodayDateString() {
-        const now = getChinaNow(); // 统一为中国时区
+        const now = getChinaNow();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, "0");
         const day = String(now.getDate()).padStart(2, "0");
@@ -331,6 +332,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // 写入依旧走 GitHub 原生 API（带 Token，配额充足，不受 CDN 缓存影响）
     function saveEntryViaGitHub(date, type, remark, details) {
         const config = getGitHubConfig();
         if (!config) {
@@ -487,7 +489,7 @@ document.addEventListener("DOMContentLoaded", function() {
     initManualEntry();
 
     function generateYearSelector() {
-        const currentYear = getChinaNow().getFullYear(); // 统一为中国时区
+        const currentYear = getChinaNow().getFullYear();
         for (let i = 1; i < 10; i++) {
             const year = currentYear - i;
             const option = document.createElement('option');
@@ -536,10 +538,10 @@ document.addEventListener("DOMContentLoaded", function() {
         let overtimeDays = 0;
 
         let startDate, endDate;
-        const today = getChinaNow(); // 统一为中国时区标准实例
+        const today = getChinaNow();
 
         if (isYearSelected && selectedYear) {
-            startDate = new Date(selectedYear, 0, 1, 0, 0, 0, 0); // 彻底移除固定的 +8 偏移干扰
+            startDate = new Date(selectedYear, 0, 1, 0, 0, 0, 0);
             endDate = new Date(selectedYear, 11, 31, 0, 0, 0, 0);
         } else {
             endDate = today;
@@ -558,7 +560,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 const dayDiv = document.createElement("div");
                 dayDiv.classList.add("day");
 
-                // 获取本地 YYYY-MM-DD 字符串
                 const localYear = currentDate.getFullYear();
                 const localMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
                 const localDay = String(currentDate.getDate()).padStart(2, "0");
@@ -610,6 +611,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                 }
 
+                // ==========================================
+                // 修复原代码 .style.classList 的语法错误
+                // ==========================================
                 dayDiv.addEventListener("mouseenter", function() {
                     const usage = this.getAttribute("data-usage");
                     const date = this.getAttribute("data-date");
@@ -626,11 +630,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     const rect = this.getBoundingClientRect();
                     tooltip.style.left = `${rect.left + window.scrollX + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
                     tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
-                    tooltip.style.classList.add("show");
+                    tooltip.classList.add("show");
                 });
 
                 dayDiv.addEventListener("mouseleave", function() {
-                    tooltip.style.classList.remove("show");
+                    tooltip.classList.remove("show");
                 });
 
                 weekDiv.appendChild(dayDiv);
@@ -646,7 +650,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function updateStats(days, hours, daysOver16Hours, daysOver17Hours, overtimeDays, year) {
         const statsContainer = document.getElementById("statsContainer");
-        const displayYear = year || getChinaNow().getFullYear(); // 统一为中国时区
+        const displayYear = year || getChinaNow().getFullYear();
 
         statsContainer.innerHTML =
             "<span>" + days + " working days in " + displayYear + "</span>" +
@@ -730,10 +734,18 @@ document.addEventListener("DOMContentLoaded", function() {
         window.addEventListener('resize', monthLabelsResizeHandler);
     }
 
+    // ==========================================
+    // 优化：加入时间安全网防护，彻底杜绝死循环高频 Fetch
+    // ==========================================
     function scheduleNextUpdate() {
-        const now = getChinaNow(); // 统一为中国时区
+        const now = getChinaNow();
         const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
-        const timeUntilMidnight = tomorrow - now;
+        let timeUntilMidnight = tomorrow - now;
+
+        // 如果剩余时间算出来小于 10 秒，强行设为 1 小时后再试，不准连续轰炸服务器
+        if (timeUntilMidnight <= 10000) {
+            timeUntilMidnight = 3600000; 
+        }
 
         setTimeout(function() {
             console.log("执行午夜更新");
