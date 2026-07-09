@@ -983,53 +983,23 @@ html, body {
 
 
 /* ================================================================= */
-/* 🚀 专属追加补丁：仅修改小屏幕竖屏状态下的对齐，绝对不更改任何其他现有功能 🚀 */
+/* 🚀 专属追加补丁：仅使底部和方格区域长轴对齐，其余所有滚动、弹出逻辑绝不触碰 🚀 */
 /* ================================================================= */
 @media (max-width: 768px) {
-    /* 让最外层包裹容器严格限制为屏幕宽度，防止其被内部元素向右意外撑开 */
-    .calendar {
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* 1. 精准对齐「Work Overtime... Less More」图例行 */
+    /* 1. 让图例行保持左对齐缩进，完美对齐上方因为星期标签缩进的第一列方格 */
     .legend {
-        box-sizing: border-box !important;
-        width: 100% !important;
-        /* 改为与上方方格区域对齐的精准内边距（减去星期标签所占位移），防止右侧超出 */
-        padding-left: 24px !important; 
-        padding-right: 0 !important;
-        margin-right: 0 !important;
-        display: flex !important;
-        justify-content: space-between !important; /* 强制两端对齐到方格左右两侧边界 */
+        padding-left: 25px !important;  /* 与上方星期标签腾出的空间精准对齐 */
+        justify-content: flex-start !important; /* 恢复原生的左对齐横向滚动 */
     }
 
-    /* 消除图例最右侧请假方块自带的 40px 右边距，防止它单枪匹马把右侧边界顶开报错 */
-    .legend-leave {
-        margin-right: 0 !important;
-    }
-
-    /* 2. 精准对齐「251 working days... 手动录入」统计行 */
+    /* 2. 让统计结果与手动录入按钮这行同样对齐方格起点 */
     .calendar-footer-row {
+        padding-left: 25px !important;  /* 起点与图例行、方格行垂直一根线精准对齐 */
         box-sizing: border-box !important;
-        width: 100% !important;
-        /* 与图例行完全相同的左侧缩进起点，实现垂直视觉一根线对齐 */
-        padding-left: 24px !important;
-        padding-right: 0 !important;
-        display: flex !important;
-        flex-direction: row !important; /* 坚定保持左右并排布局不打乱 */
-        justify-content: space-between !important; /* 让工作天数与手动录入按钮刚好卡在方格两端 */
-        align-items: center !important;
     }
-
-    /* 限制统计文本最大宽度，防止字数变多时强行向右顶破对齐边界 */
-    .calendar-footer .stats-container {
-        flex: 1 !important;
-        white-space: nowrap !important;
-    }
-
-    /* 强制手动录入按钮紧贴方格的最右侧边缘 */
-    .manual-entry-btn {
-        margin-left: auto !important;
+    
+    /* 移除可能导致右侧对齐不均的过大死间距，确保滑动到最右侧时边缘整齐 */
+    .legend-leave {
+        margin-right: 10px !important; 
     }
 }
