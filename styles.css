@@ -983,22 +983,50 @@ html, body {
 
 
 /* ================================================================= */
-/* 🚀 专属追加补丁：仅使底部和方格区域长轴对齐，其余所有滚动、弹出逻辑绝不触碰 🚀 */
+/* 🚀 专属追加补丁：彻底解决左侧溢出问题，并保证方格、图例对齐滚动 🚀 */
 /* ================================================================= */
 @media (max-width: 768px) {
-    /* 1. 让图例行保持左对齐缩进，完美对齐上方因为星期标签缩进的第一列方格 */
-    .legend {
-        padding-left: 25px !important;  /* 与上方星期标签腾出的空间精准对齐 */
-        justify-content: flex-start !important; /* 恢复原生的左对齐横向滚动 */
+    /* 【核心修复】将居中排列改为靠左，防止宽内容在小屏上被强行居中挤出屏幕外 */
+    body {
+        justify-content: flex-start !important;
     }
 
-    /* 2. 让统计结果与手动录入按钮这行同样对齐方格起点 */
+    /* 限制最外层容器，禁止横向挤爆页面整体 */
+    .container, .calendar {
+        width: 100% !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important; 
+    }
+
+    /* 保持主体方格的横向滚动功能 */
+    .content {
+        width: 100% !important;
+        overflow-x: auto !important;
+        padding-bottom: 5px; /* 留出横向滚动条的视觉空间 */
+    }
+
+    /* 1. 图例行保持原生滑动，并对齐上方第一列方格 */
+    .legend {
+        padding-left: 25px !important;
+        justify-content: flex-start !important; 
+    }
+
+    /* 2. 统计结果和底部录入按钮同样添加对齐偏移 */
     .calendar-footer-row {
-        padding-left: 25px !important;  /* 起点与图例行、方格行垂直一根线精准对齐 */
+        padding-left: 25px !important;  
+        box-sizing: border-box !important;
+    }
+
+    /* 3. 限制弹出面板不超出屏幕边缘 */
+    .manual-entry-panel {
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
         box-sizing: border-box !important;
     }
     
-    /* 移除可能导致右侧对齐不均的过大死间距，确保滑动到最右侧时边缘整齐 */
     .legend-leave {
         margin-right: 10px !important; 
     }
