@@ -1041,27 +1041,47 @@ html, body {
     --calendar-grid-offset: 25px;
 }
 
-.legend,
-.calendar-footer {
-    box-sizing: border-box;
-    width: calc(100% - var(--calendar-grid-offset));
-    margin-left: var(--calendar-grid-offset);
-    padding-left: 0;
-}
+@media (max-width: 768px) and (orientation: portrait) {
+    .months {
+        overflow: hidden;
+    }
 
-.calendar-footer-row,
-.manual-entry-panel-slot {
-    width: 100%;
-}
+    .months div {
+        transform: translateX(calc(-1 * var(--month-scroll-offset, 0px)));
+    }
 
-@media (max-width: 768px) {
-    .legend,
+    .legend {
+        display: grid !important;
+        grid-template-columns: max-content max-content;
+        justify-content: start !important;
+        column-gap: 12px;
+        row-gap: 4px;
+        box-sizing: border-box;
+        width: calc(100% - var(--calendar-grid-offset)) !important;
+        margin-left: var(--calendar-grid-offset);
+        padding-left: 0 !important;
+        overflow-x: visible !important;
+    }
+
+    .legend-overtime,
+    .legend-leave,
+    .legend-business-trip,
+    .legend-main {
+        margin-right: 0 !important;
+    }
+
     .calendar-footer {
-        padding-left: 0;
+        box-sizing: border-box;
+        width: calc(100% - var(--calendar-grid-offset));
+        margin-left: var(--calendar-grid-offset);
+    }
+
+    .calendar-footer-row,
+    .manual-entry-panel-slot {
+        width: 100%;
     }
 
     .calendar-footer .manual-entry-panel-slot {
-        width: 100%;
         max-width: 100%;
     }
 }

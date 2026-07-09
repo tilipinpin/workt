@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     const calendar = document.querySelector(".calendar");
     const monthsContainer = document.querySelector(".months");
+    const contentContainer = document.querySelector(".content");
     const weeksContainer = document.querySelector(".weeks");
     const tooltip = document.getElementById("tooltip");
     const yearSelector = document.getElementById("yearSelector");
@@ -40,6 +41,17 @@ document.addEventListener("DOMContentLoaded", function() {
     let calendarGenerated = false;
     let monthLabelsResizeHandler = null;
     let monthLabelsState = null;
+
+    function isMobilePortrait() {
+        return window.matchMedia("(max-width: 768px) and (orientation: portrait)").matches;
+    }
+
+    function syncMonthScroll() {
+        const scrollOffset = isMobilePortrait() ? contentContainer.scrollLeft : 0;
+        monthsContainer.style.setProperty("--month-scroll-offset", scrollOffset + "px");
+    }
+
+    contentContainer.addEventListener("scroll", syncMonthScroll);
 
     // ==========================================
     // 标准中国时区时间获取函数
@@ -692,6 +704,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             calendar.style.setProperty('--calendar-grid-offset', weekElements[0].offsetLeft + 'px');
+            syncMonthScroll();
             const topOffset = 10;
 
             let currentDate = new Date(monthLabelsState.startDate);
