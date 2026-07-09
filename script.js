@@ -25,10 +25,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const GITHUB_REPO = "tilipinpin/workt";
     const GITHUB_FILE_PATH = "date/usage_data.csv";
     
-    // ==========================================
-    // 优化：读取使用 jsDelivr CDN 完美避免 429 限流
-    // ==========================================
-    const DATA_URL = "https://cdn.jsdelivr.net/gh/" + GITHUB_REPO + "@main/" + GITHUB_FILE_PATH;
+    const RAW_DATA_URL = "https://raw.githubusercontent.com/" + GITHUB_REPO + "/main/" + GITHUB_FILE_PATH;
+    const CDN_DATA_URL = "https://cdn.jsdelivr.net/gh/" + GITHUB_REPO + "@main/" + GITHUB_FILE_PATH;
     const TOKEN_STORAGE_KEY = "workt_github_token";
 
     const ENTRY_TYPES = {
@@ -533,9 +531,27 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
-        const url = forceReload ? DATA_URL + "?t=" + Date.now() : DATA_URL;
-        return fetch(url)
-            .then(function(response) { return response.text(); })
+        const cacheBuster = forceReload ? "?t=" + Date.now() : "";
+        const urls = [RAW_DATA_URL + cacheBuster, CDN_DATA_URL + cacheBuster];
+
+        function fetchCsv(index) {
+            return fetch(urls[index], { cache: "no-store" })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error("CSV 读取失败: " + response.status);
+                    }
+                    return response.text();
+                })
+                .catch(function(error) {
+                    if (index + 1 < urls.length) {
+                        console.warn("CSV 读取源失败，切换备用源:", error);
+                        return fetchCsv(index + 1);
+                    }
+                    throw error;
+                });
+        }
+
+        return fetchCsv(0)
             .then(applyData)
             .catch(function(error) { console.error("Error:", error); });
     }
