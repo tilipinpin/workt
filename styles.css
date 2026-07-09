@@ -14,15 +14,6 @@ body {
     margin-top: 10px; /* 添加顶部外边距来下移整个内容 */
 }
 
-.calendar {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 1200px;
-    padding-top: 40px;
-}
-
 .months {
     position: relative;
     height: 20px;
@@ -41,22 +32,6 @@ body {
     display: flex;
     flex-wrap: nowrap; /* 不换行 */
     overflow-x: auto; /* 允许水平滚动 */
-}
-
-.weekdays {
-    display: flex;
-    flex-direction: column; /* 默认情况下为列方向 */
-    justify-content: space-between;
-    padding-top: 0px; /* 为月份标签留出空间 */
-    margin-right: 5px;
-}
-
-.weekdays div {
-    height: 13px;
-    font-size: 12px;
-    color: #050505;
-    margin-top: -1.5px; /* 增加这一 */
-    margin-bottom: 1px; /* 增加这一行 */
 }
 
 .weeks {
@@ -204,11 +179,6 @@ body {
     }
 }
 
-.no-data {
-    background-color: #f0f0f0;
-    opacity: 0.5;
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
     .months {
@@ -268,68 +238,16 @@ body {
 
 .business-trip-text {
     margin-right: 5px; /* 保持之前的右侧间距 */
-    color: #a5b029; 
-}
-
-.overtime-text {
-    color: #000000; /* 将颜色改为黑色 */
-}
-
-.days-over-16-text {
-    color: #050505; /* 保持原有颜色 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .overtime-text,
-    .days-over-16-text {
-        font-size: 10px; /* 在小屏幕上减小字体大小 */
-    }
 }
 
 .day[data-level="6"] {
     background-color: #f30606;  /* 红色 */
 }
 
-.legend-leave {
-    display: flex;
-    align-items: center;
-    margin-right: 40px; /* 增加右侧间距 */
-    flex-shrink: 0;
-}
-
-.legend-leave .legend-square {
-    width: 10px;
-    height: 10px;
-    margin-right: 5px;
-    border-radius: 1.5px;
-    background-color: #f30606;
-}
-
-@media (max-width: 768px) {
-    .legend-leave {
-        margin-bottom: 0;
-    }
-    
-    .legend-leave .legend-square {
-        width: 8px;
-        height: 8px;
-    }
-    
-    .days-over-17-text {
-        font-size: 1em; /* 在小屏幕上减小字体大小 */
-    }
-}
-
-.legend-container {
-    display: flex;
-    align-items: center; /* 垂直居对齐 */
-    margin-top: 10px; /* 与日历内容之间的间距 */
-}
-
 .legend-square {
     width: 10px;
     height: 10px;
+    margin: 0 1px;
     margin-right: 2.5px;
     border-radius: 1.5px;
 }
@@ -389,6 +307,10 @@ body {
         margin-right: 3px; /* 一步减少右侧间距 */
     }
 
+    .legend-leave {
+        margin-bottom: 0;
+    }
+
     .legend-main {
         margin-right: 3px; /* 确保 "MORE" 和 "LESS" 之间的间距适当 */
     }
@@ -417,6 +339,10 @@ body {
     .legend-overtime .legend-square {
         width: 8px; /* 确保请假和加班图例的方块也缩小 */
         height: 8px; /* 确保请假和加班图例的方块也缩小 */
+    }
+
+    .days-over-17-text {
+        font-size: 1em; /* 在小屏幕上减小字体大小 */
     }
 }
 
@@ -454,40 +380,6 @@ body {
     }
 }
 
-.year-selector {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 4px 20px 4px 8px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-    color: #333;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    outline: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 5px top 50%;
-    background-size: 16px;
-    z-index: 2;
-}
-
-.year-selector:hover {
-    background-color: #f0f0f0;
-    border-color: #999;
-}
-
-.year-selector:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 1px rgba(76,175,80,0.2);
-}
-
 .year-selector option {
     padding: 6px;
     background-color: #fff;
@@ -495,53 +387,8 @@ body {
 }
 
 .year-selector option[value="recent"] {
-    font-size: 11px;
     font-weight: bold;
     color: #4CAF50;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .year-selector {
-        font-size: 10px;
-        padding: 3px 18px 3px 6px;
-        background-size: 14px;
-    }
-
-    .year-selector option[value="recent"] {
-        font-size: 9px;
-    }
-}
-
-/* 选中时显示底纹 */
-.year.selected::after {
-    content: ''; /* 创建伪元素 */
-    position: absolute; /* 使用绝对定位 */
-    bottom: 0; /* 定位底部 */
-    left: 0;
-    right: 0;
-    height: 6px; /* 设置底纹高度 */
-    background-color: green; /* 选中时底纹为绿色 */
-    border-radius: 0 0 3px 3px; /* 圆 */
-}
-
-/* 悬停时不显示底纹 */
-.year:hover::after {
-    content: none; /* 不显示底纹 */
-}
-
-/* 悬时的背景色和放大效果 */
-.year:hover {
-    background-color: #f0f0f0; /* 悬时的背景色 */
-    transform: scale(1.05); /* 悬停时放大效果 */
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .year {
-        font-size: 10px; /* 在小屏幕上缩小字体 */
-        padding: 2px; /* 减少内边距 */
-    }
 }
 
 /* 添加这个新的样式规则 */
@@ -613,6 +460,7 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
     cursor: pointer;
+    outline: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
