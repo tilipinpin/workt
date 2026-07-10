@@ -630,11 +630,18 @@ body {
 .entry-field-token {
     flex-wrap: wrap;
     width: 100%;
+    min-width: 0;
 }
 
 .entry-field-token input {
     flex: 1;
     min-width: 140px;
+}
+
+.entry-token-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
 .entry-token-save-btn,
@@ -790,15 +797,31 @@ body {
     .entry-field-token {
         flex-direction: column;
         align-items: stretch;
+        box-sizing: border-box;
+        max-width: 100%;
     }
 
     .entry-field-token input {
         width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .entry-token-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .entry-token-save-btn,
     .entry-token-clear-btn {
-        flex: 1;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
 
     .manual-entry-panel {

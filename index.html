@@ -57,8 +57,10 @@
                         <label class="entry-field entry-field-token">
                             <span>GitHub Token</span>
                             <input type="password" id="tokenInput" autocomplete="off" inputmode="text" placeholder="ghp_...（首次使用必填）">
-                            <button type="button" id="tokenSave" class="entry-token-save-btn">保存 Token</button>
-                            <button type="button" id="tokenClear" class="entry-token-clear-btn">清除</button>
+                            <div class="entry-token-actions">
+                                <button type="button" id="tokenSave" class="entry-token-save-btn">保存 Token</button>
+                                <button type="button" id="tokenClear" class="entry-token-clear-btn">清除</button>
+                            </div>
                         </label>
                         <span id="tokenStatus" class="entry-token-status" role="status"></span>
                     </div>
