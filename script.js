@@ -451,7 +451,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     setEntryStatus("", "");
                 }
 
-                entryDate.focus({ preventScroll: true });
             }
         });
 
